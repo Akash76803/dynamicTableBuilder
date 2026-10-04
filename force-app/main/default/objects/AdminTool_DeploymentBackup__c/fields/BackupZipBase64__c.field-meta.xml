@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>BackupZipBase64__c</fullName>
-    <label>Backup ZIP Base64</label>
-    <length>131072</length>
-    <trackTrending>false</trackTrending>
-    <type>LongTextArea</type>
-    <visibleLines>8</visibleLines>
-</CustomField>

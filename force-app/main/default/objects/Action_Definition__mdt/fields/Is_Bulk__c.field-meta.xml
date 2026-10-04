@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Is_Bulk__c</fullName>
-    <defaultValue>false</defaultValue>
-    <description>Indicates if the action can be executed in bulk.</description>
-    <fieldManageability>DeveloperControlled</fieldManageability>
-    <label>Is Bulk</label>
-    <type>Checkbox</type>
-</CustomField>
