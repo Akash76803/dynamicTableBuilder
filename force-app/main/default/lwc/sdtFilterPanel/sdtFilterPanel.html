@@ -1,0 +1,103 @@
+<template>
+  <div class="sdt-filter-panel">
+    <!-- Header -->
+    <div class="panel-header">
+      <span class="panel-title">Filters</span>
+      <button class="panel-close-btn" onclick={handleClose} title="Close">✕</button>
+    </div>
+
+    <!-- Actions (Top) -->
+    <div class="panel-actions">
+      <button class="btn-add-filter" onclick={handleAddRow}>+ Add Filter</button>
+      <div class="footer-right">
+        <button class="btn-clear" onclick={handleClear} disabled={noFilters}>Clear All</button>
+        <button class="btn-apply" onclick={handleApply}>Apply</button>
+      </div>
+    </div>
+
+    <!-- Filter rows -->
+    <div class="filter-rows">
+      <template for:each={filterRows} for:item="row">
+        <div key={row.id} class="filter-row">
+
+          <!-- Field Selector -->
+          <select
+            class="filter-select filter-field"
+            data-id={row.id}
+            data-col="fieldName"
+            onchange={handleFieldChange}
+          >
+            <option value="">-- Field --</option>
+            <template for:each={filterableColumns} for:item="col">
+              <option key={col.key} value={col.key}>{col.label}</option>
+            </template>
+          </select>
+
+          <!-- Operator Selector -->
+          <template if:true={row.fieldKey}>
+            <select
+              class="filter-select filter-op"
+              data-id={row.id}
+              data-col="operator"
+              onchange={handleOperatorChange}
+            >
+              <option value="">-- Operator --</option>
+              <template for:each={row.operators} for:item="op">
+                <option key={op.value} value={op.value}>{op.label}</option>
+              </template>
+            </select>
+          </template>
+
+          <!-- Value Input (single) -->
+          <template if:true={row.showSingleInput}>
+            <input
+              type={row.inputType}
+              class="filter-input"
+              placeholder="Value..."
+              value={row.value}
+              data-id={row.id}
+              data-col="value"
+              onchange={handleValueChange}
+            />
+          </template>
+
+          <!-- Value Input (between / range) -->
+          <template if:true={row.showRangeInput}>
+            <input
+              type={row.inputType}
+              class="filter-input filter-input--half"
+              placeholder="Min"
+              value={row.valueMin}
+              data-id={row.id}
+              data-col="valueMin"
+              onchange={handleValueChange}
+            />
+            <input
+              type={row.inputType}
+              class="filter-input filter-input--half"
+              placeholder="Max"
+              value={row.valueMax}
+              data-id={row.id}
+              data-col="valueMax"
+              onchange={handleValueChange}
+            />
+          </template>
+
+          <!-- Remove row button -->
+          <button
+            class="filter-remove-btn"
+            data-id={row.id}
+            onclick={handleRemoveRow}
+            title="Remove filter"
+          >✕</button>
+
+        </div>
+      </template>
+
+      <!-- Empty state -->
+      <template if:false={hasFilterRows}>
+        <p class="filter-empty">No filters added yet. Click "+ Add Filter" above.</p>
+      </template>
+    </div>
+  </div>
+</template>

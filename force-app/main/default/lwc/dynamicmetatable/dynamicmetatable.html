@@ -1,0 +1,1665 @@
+<template>
+  <template if:true={useGqlMetadata}>
+    <c-table-config-gql-provider
+      table-name={tableName}
+      onconfigload={handleGqlConfigLoad}
+      onconfigerror={handleGqlError}
+    >
+    </c-table-config-gql-provider>
+  </template>
+  <div class={tableWrapperClass}>
+    <!-- Skeleton Loading State -->
+    <template if:true={isLoading}>
+      <div class="skeleton-toolbar">
+        <div class="skeleton-block skeleton-title"></div>
+        <div class="skeleton-block skeleton-search"></div>
+        <div style="flex: 1"></div>
+        <div class="skeleton-block skeleton-btn"></div>
+        <div class="skeleton-block skeleton-btn"></div>
+      </div>
+      <div class="skeleton-table">
+        <div class="skeleton-header-row">
+          <div class="skeleton-block skeleton-cell skeleton-cell--short"></div>
+          <div class="skeleton-block skeleton-cell skeleton-cell--long"></div>
+          <div class="skeleton-block skeleton-cell"></div>
+          <div class="skeleton-block skeleton-cell skeleton-cell--long"></div>
+          <div class="skeleton-block skeleton-cell"></div>
+        </div>
+        <template for:each={skeletonRows} for:item="row">
+          <div key={row} class="skeleton-data-row">
+            <div
+              class="skeleton-block skeleton-cell skeleton-cell--short"
+            ></div>
+            <div class="skeleton-block skeleton-cell skeleton-cell--long"></div>
+            <div class="skeleton-block skeleton-cell"></div>
+            <div class="skeleton-block skeleton-cell skeleton-cell--long"></div>
+            <div class="skeleton-block skeleton-cell"></div>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════
+             TOOLBAR
+        ════════════════════════════════════════════════════════════ -->
+    <template if:true={showExportDialog}>
+      <section class="export-modal-backdrop" role="presentation">
+        <div
+          class="export-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="export-modal-title"
+        >
+          <header class="export-modal-header">
+            <h2 id="export-modal-title">Export</h2>
+          </header>
+
+          <div class="export-modal-body">
+            <div class="export-section-label">Export View</div>
+            <div class="export-view-options">
+              <button
+                type="button"
+                class={formattedExportViewClass}
+                data-view="FORMATTED"
+                onclick={handleExportViewSelect}
+              >
+                <span class="export-checkmark">
+                  <lightning-icon
+                    icon-name="utility:check"
+                    size="x-small"
+                  ></lightning-icon>
+                </span>
+                <span class="export-card-title">{formattedExportCardTitle}</span>
+                <span class="export-card-copy">
+                  {formattedExportCardCopy}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                class={detailsExportViewClass}
+                data-view="DETAILS"
+                onclick={handleExportViewSelect}
+              >
+                <span class="export-checkmark">
+                  <lightning-icon
+                    icon-name="utility:check"
+                    size="x-small"
+                  ></lightning-icon>
+                </span>
+                <span class="export-card-title">Details Only</span>
+                <span class="export-card-copy">
+                  {detailsExportCardCopy}
+                </span>
+              </button>
+            </div>
+
+            <div class="export-field-grid">
+              <label class="export-field">
+                <span>Format</span>
+                <select
+                  value={exportFormat}
+                  onchange={handleExportFormatChange}
+                  disabled={isFormattedExportView}
+                >
+                  <option value="xls">Excel Format .xls</option>
+                  <option value="csv">Comma Delimited .csv</option>
+                </select>
+              </label>
+
+              <label class="export-field">
+                <span>Encoding</span>
+                <select
+                  value={exportEncoding}
+                  onchange={handleExportEncodingChange}
+                >
+                  <option value="UTF-8">Unicode (UTF-8)</option>
+                  <option value="ISO-8859-1">
+                    ISO-8859-1 (General US &amp; Western European)
+                  </option>
+                  <option value="UTF-16">Unicode (UTF-16)</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <footer class="export-modal-footer">
+            <button
+              type="button"
+              class="export-cancel-btn"
+              onclick={handleCloseExportDialog}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="export-primary-btn"
+              onclick={handleConfirmExport}
+              disabled={exportInProgress}
+            >
+              {exportPrimaryLabel}
+            </button>
+          </footer>
+        </div>
+      </section>
+    </template>
+
+    <template if:false={isWidgetMode}>
+      <div class="toolbar">
+        <!-- Left: Search and Title -->
+        <div class="toolbar-left">
+          <template if:true={logoUrl}>
+            <img src={logoUrl} alt="Logo" class="slds-m-right_x-small table-logo" style="height: 24px; width: auto; object-fit: contain; align-self: center;" />
+          </template>
+          <template if:true={logoIcon}>
+            <template if:false={logoUrl}>
+              <lightning-icon
+                icon-name={logoIcon}
+                size="small"
+                class="slds-m-right_x-small table-logo-icon"
+              ></lightning-icon>
+            </template>
+          </template>
+          <template if:true={_displayTableName}>
+            <h1 class="table-title">{_displayTableName}</h1>
+            <template if:true={currentAppliedViewName}>
+              <span class="active-view-badge" title="Applied Saved View">
+                {currentAppliedViewName}
+              </span>
+            </template>
+          </template>
+          <div class="search-box">
+            <c-table-search onsearch={handleSearch}></c-table-search>
+          </div>
+
+          <!-- Selection count badge (visible when rows are selected) -->
+          <template if:true={hasSelections}>
+            <span class="selection-badge">
+              <lightning-icon
+                icon-name="utility:check"
+                size="xx-small"
+                class="selection-badge-icon"
+              ></lightning-icon>
+              {selectedCountLabel}
+              <button
+                class="selection-clear-btn"
+                onclick={handleClearSelection}
+                title="Clear selection"
+              >
+                ✕
+              </button>
+            </span>
+          </template>
+        </div>
+
+        <!-- Right: Actions -->
+        <div class="toolbar-right">
+          <!-- Record Count (updates to "X of Y" when filtered) -->
+          <template if:false={_localIsMatrixMode}>
+            <span class="record-count">{recordCountLabel}</span>
+          </template>
+
+          <!-- Page Size Selector Dropdown -->
+          <template if:false={_localIsMatrixMode}>
+            <div class="page-size-selector-wrap">
+              <label for="page-size-select" class="page-size-label"
+                >Per page:</label
+              >
+              <select
+                id="page-size-select"
+                class="page-size-select"
+                value={pageSize}
+                onchange={handlePageSizeChange}
+                aria-label="Records per page"
+              >
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+              </select>
+            </div>
+          </template>
+
+          <!-- Global New Button (NEW) -->
+          <template if:true={_enableNewRecord}>
+            <button
+              class="btn-save"
+              onclick={handleNewRecord}
+              title="Create New Record"
+            >
+              <lightning-icon
+                icon-name="utility:add"
+                size="x-small"
+                inverse
+                variant="inverse"
+              ></lightning-icon>
+              New
+            </button>
+          </template>
+
+          <!-- Filter Toggle Button -->
+          <div class="filter-btn-wrap">
+            <template if:true={_enableFilters}>
+              <button
+                class={filterToggleClass}
+                onclick={handleFilterToggle}
+                title={filterToggleTitle}
+                aria-expanded={showFilterPanel}
+                aria-controls="filter-panel-region"
+              >
+                <lightning-icon
+                  icon-name="utility:filter"
+                  size="x-small"
+                  class="filter-btn-icon"
+                >
+                </lightning-icon>
+
+                <span class="filter-btn-label">Filters</span>
+
+                <!-- Active filter badge (dot) -->
+                <template if:true={hasActiveFilters}>
+                  <span class="filter-badge" title={filterBadgeTitle}>
+                    {activeFilterCount}
+                  </span>
+                </template>
+              </button>
+
+              <!-- Clear all filters shortcut (visible when filters are active) -->
+              <template if:true={hasActiveFilters}>
+                <button
+                  class="btn-clear-filters"
+                  onclick={handleClearFilters}
+                  title="Clear all filters"
+                >
+                  <lightning-icon
+                    icon-name="utility:close"
+                    size="xx-small"
+                  ></lightning-icon>
+                </button>
+              </template>
+            </template>
+          </div>
+
+          <!-- Density Toggle -->
+          <button
+            class="btn-export btn-density"
+            onclick={handleDensityToggle}
+            title={densityTooltip}
+          >
+            <lightning-icon
+              icon-name={densityIcon}
+              size="x-small"
+            ></lightning-icon>
+            {densityLabel}
+          </button>
+
+          <!-- Refresh Button -->
+          <button
+            class="btn-export"
+            onclick={handleRefresh}
+            title="Refresh data from server"
+            disabled={isRefreshing}
+          >
+            <template if:true={isRefreshing}>
+              <lightning-icon
+                icon-name="utility:spinner"
+                size="x-small"
+                class="spin-icon"
+              ></lightning-icon>
+              Refreshing...
+            </template>
+            <template if:false={isRefreshing}>
+              <lightning-icon
+                icon-name="utility:refresh"
+                size="x-small"
+              ></lightning-icon>
+              Refresh
+            </template>
+          </button>
+
+          <!-- Matrix Mode Button -->
+          <template if:true={_enableMatrixView}>
+            <button
+              class={matrixBtnClass}
+              onclick={handleMatrixToggle}
+              title="Toggle between standard table and Matrix/Pivot report"
+            >
+              <lightning-icon
+                icon-name="utility:matrix"
+                size="x-small"
+              ></lightning-icon>
+              {matrixBtnLabel}
+            </button>
+          </template>
+
+          <!-- Column Manager Button -->
+          <template if:true={_enableColumnManager}>
+            <button
+              class="btn-export"
+              onclick={handleOpenColumnManager}
+              title="Manage visible columns and their order"
+            >
+              <lightning-icon
+                icon-name="utility:setup"
+                size="x-small"
+              ></lightning-icon>
+              Columns
+            </button>
+          </template>
+
+          <!-- Saved Views Button -->
+          <template if:true={_enableViews}>
+            <button
+              class="btn-export"
+              onclick={handleOpenViewManager}
+              title="Manage and apply saved templates/views"
+            >
+              <lightning-icon
+                icon-name="utility:bookmark"
+                size="x-small"
+              ></lightning-icon>
+              Views
+            </button>
+          </template>
+
+          <!-- Data Import Button -->
+          <template if:true={_enableImport}>
+            <button
+              class="btn-export"
+              onclick={handleOpenImport}
+              title="Import data from CSV"
+              disabled={_isSaving}
+            >
+              <lightning-icon
+                icon-name="utility:upload"
+                size="x-small"
+              ></lightning-icon>
+              Import
+            </button>
+          </template>
+
+          <!-- Export to CSV Button -->
+          <template if:true={_enableExport}>
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+              "
+            >
+              <button
+                class="btn-export"
+                onclick={handleExport}
+                title={exportButtonTitle}
+                disabled={isHeaderExportDisabled}
+              >
+                <template if:true={exportInProgress}>
+                  <lightning-icon
+                    icon-name="utility:spinner"
+                    size="x-small"
+                    class="spin-icon"
+                  ></lightning-icon>
+                  {exportBusyLabel}
+                </template>
+                <template if:false={exportInProgress}>
+                  <lightning-icon
+                    icon-name="utility:download"
+                    size="x-small"
+                  ></lightning-icon>
+                  {exportToolbarLabel}
+                </template>
+              </button>
+              <template if:true={exportError}>
+                <div
+                  class="slds-text-color_error slds-m-top_xx-small"
+                  style="font-size: 0.75rem"
+                >
+                  ⚠️ {exportError}
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <!-- Save Changes (existing) -->
+          <template if:true={hasEdits}>
+            <button class="btn-save" onclick={handleSave} disabled={_isSaving}>
+              <template if:true={_isSaving}>
+                <lightning-icon
+                  icon-name="utility:spinner"
+                  size="x-small"
+                  class="spin-icon"
+                ></lightning-icon>
+                Saving...
+              </template>
+              <template if:false={_isSaving}>
+                <lightning-icon
+                  icon-name="utility:save"
+                  size="x-small"
+                ></lightning-icon>
+                Save Changes
+              </template>
+            </button>
+          </template>
+          <!-- Custom Selection Actions -->
+          <template for:each={selectionActions} for:item="action">
+            <button
+              key={action.id}
+              class="btn-action btn-custom-action"
+              data-id={action.id}
+              onclick={handleActionClick}
+              disabled={_isSaving}
+            >
+              <lightning-icon
+                if:true={action.icon}
+                icon-name={action.icon}
+                size="x-small"
+              ></lightning-icon>
+              {action.label}
+            </button>
+          </template>
+        </div>
+      </div>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════
+             SIDEBAR VIEW PANEL (slides out from the right)
+        ════════════════════════════════════════════════════════════ -->
+    <template if:false={isWidgetMode}>
+      <!-- View Backdrop Overlay -->
+      <div
+        class={viewBackdropClass}
+        onclick={handleCloseViewManager}
+        aria-hidden={viewPanelAriaHidden}
+      ></div>
+
+      <!-- Slide-out Sidebar Panel -->
+      <div class={viewSidebarClass} aria-hidden={viewPanelAriaHidden}>
+        <template if:true={_showViewManager}>
+          <c-table-view-manager
+            table-name={tableName}
+            current-columns={columns}
+            current-filter-payload={_filterPayload}
+            current-sort-key={_sortKey}
+            current-sort-dir={_sortDir}
+            current-matrix-config={currentMatrixConfig}
+            applied-view-id={currentAppliedViewId}
+            onapplyview={handleApplyView}
+            onresetview={handleResetView}
+            onviewsaved={handleViewSaved}
+            onclose={handleCloseViewManager}
+          >
+          </c-table-view-manager>
+        </template>
+      </div>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════
+             SIDEBAR FILTER PANEL (slides out from the right)
+        ════════════════════════════════════════════════════════════ -->
+    <template if:false={isWidgetMode}>
+      <!-- Backdrop Overlay -->
+      <div
+        class={filterBackdropClass}
+        onclick={handleFilterClose}
+        aria-hidden={filterPanelAriaHidden}
+      ></div>
+
+      <!-- Slide-out Sidebar Panel -->
+      <div class={filterSidebarClass} aria-hidden={filterPanelAriaHidden}>
+        <template if:true={showFilterPanel}>
+          <c-table-filter
+            columns={columns}
+            applied-filters={_filterPayload}
+            picklist-options-map={_picklistOptionsMap}
+            lookup-display-map={_lookupDisplayMap}
+            onfilterchange={handleFilterChange}
+            onfiltercancel={handleFilterCancel}
+            onfilterclose={handleFilterClose}
+            onlookupquery={handleLookupQuery}
+          >
+          </c-table-filter>
+        </template>
+      </div>
+    </template>
+
+    <!-- Active filter chips (summary bar whenever filters are on) -->
+    <template if:true={showFilterChipsBar}>
+        <div class="filter-chip-bar">
+          <span class="chip-bar-label">Active filters:</span>
+          <template for:each={activeFilterChips} for:item="chip">
+            <span key={chip.id} class="filter-chip">
+              <span class="chip-field">{chip.field}</span>
+              <span class="chip-op">{chip.operator}</span>
+              <span class="chip-val">{chip.displayValue}</span>
+              <button
+                class="chip-remove"
+                data-id={chip.id}
+                onclick={handleRemoveChip}
+                title="Remove this filter"
+              >
+                &#10005;
+              </button>
+            </span>
+          </template>
+        </div>
+    </template>
+
+    <!-- Matrix Configurator -->
+    <template if:false={isWidgetMode}>
+      <template if:true={_isMatrixMode}>
+        <div class="matrix-config-bar-modern">
+          <!-- Row Grouping -->
+          <div class="matrix-config-group-modern">
+            <span class="matrix-config-label">Row Groups</span>
+            <div class="matrix-config-inputs">
+              <template for:each={selectedRowGroupOptions} for:item="opt">
+                <div key={opt.value} class="matrix-pill-modern">
+                  <span class="matrix-pill-label">{opt.label}</span>
+                  <template if:true={opt.isDate}>
+                    <select
+                      class="matrix-select-mini"
+                      data-field={opt.value}
+                      value={opt.granularity}
+                      onchange={handleGranularityChange}
+                    >
+                      <template for:each={granularityOptions} for:item="g">
+                        <option key={g.value} value={g.value}>{g.label}</option>
+                      </template>
+                    </select>
+                  </template>
+                  <button
+                    class="matrix-pill-remove"
+                    data-field={opt.value}
+                    onclick={handleRemoveRowGroup}
+                    title="Remove"
+                  >
+                    ×
+                  </button>
+                </div>
+              </template>
+              <lightning-button-menu
+                alternative-text="Add Row Group"
+                icon-name="utility:add"
+                icon-size="x-small"
+                menu-alignment="left"
+                onselect={handleAddRowGroup}
+                tooltip="Add Row Group"
+                class="matrix-add-btn"
+              >
+                <template for:each={availableRowGroupOptions} for:item="col">
+                  <lightning-menu-item
+                    key={col.value}
+                    value={col.value}
+                    label={col.label}
+                  ></lightning-menu-item>
+                </template>
+              </lightning-button-menu>
+            </div>
+          </div>
+
+          <!-- Column Grouping -->
+          <div class="matrix-config-group-modern">
+            <span class="matrix-config-label">Column Groups</span>
+            <div class="matrix-config-inputs">
+              <template for:each={selectedColGroupOptions} for:item="opt">
+                <div key={opt.value} class="matrix-pill-modern">
+                  <span class="matrix-pill-label">{opt.label}</span>
+                  <template if:true={opt.isDate}>
+                    <select
+                      class="matrix-select-mini"
+                      data-field={opt.value}
+                      value={opt.granularity}
+                      onchange={handleGranularityChange}
+                    >
+                      <template for:each={granularityOptions} for:item="g">
+                        <option key={g.value} value={g.value}>{g.label}</option>
+                      </template>
+                    </select>
+                  </template>
+                  <button
+                    class="matrix-pill-remove"
+                    data-field={opt.value}
+                    onclick={handleRemoveColGroup}
+                    title="Remove"
+                  >
+                    ×
+                  </button>
+                </div>
+              </template>
+              <lightning-button-menu
+                alternative-text="Add Column Group"
+                icon-name="utility:add"
+                icon-size="x-small"
+                menu-alignment="left"
+                onselect={handleAddColGroup}
+                tooltip="Add Column Group (Max 2)"
+                class="matrix-add-btn"
+              >
+                <template for:each={availableColGroupOptions} for:item="col">
+                  <lightning-menu-item
+                    key={col.value}
+                    value={col.value}
+                    label={col.label}
+                  ></lightning-menu-item>
+                </template>
+              </lightning-button-menu>
+            </div>
+          </div>
+
+          <!-- Summary Fields -->
+          <div class="matrix-config-group-modern">
+            <span class="matrix-config-label">Summary Fields</span>
+            <div class="matrix-config-inputs">
+              <template for:each={selectedSummaryOptions} for:item="opt">
+                <div
+                  key={opt.value}
+                  class="matrix-pill-modern matrix-pill-summary"
+                >
+                  <span class="matrix-pill-label">{opt.label}</span>
+                  <button
+                    class="matrix-pill-remove"
+                    data-field={opt.value}
+                    onclick={handleRemoveSummary}
+                    title="Remove"
+                  >
+                    ×
+                  </button>
+                </div>
+              </template>
+              <lightning-button-menu
+                alternative-text="Add Summary Field"
+                icon-name="utility:add"
+                icon-size="x-small"
+                menu-alignment="left"
+                onselect={handleAddSummary}
+                tooltip="Add Summary Field"
+                class="matrix-add-btn"
+              >
+                <template for:each={availableSummaryOptions} for:item="col">
+                  <lightning-menu-item
+                    key={col.value}
+                    value={col.value}
+                    label={col.label}
+                  ></lightning-menu-item>
+                </template>
+              </lightning-button-menu>
+
+              <!-- Aggregate Function Selector -->
+              <div class="matrix-aggregate-dropdown">
+                <span
+                  class="matrix-config-label slds-m-left_large slds-m-right_xx-small"
+                  >Aggregate:</span
+                >
+                <select
+                  class="matrix-select-mini"
+                  onchange={handleAggregateChange}
+                >
+                  <template for:each={aggregateTypeOptions} for:item="opt">
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="matrix-config-action-modern">
+            <button
+              class="btn-save matrix-generate-btn"
+              onclick={handleGenerateMatrix}
+              disabled={isGenerateMatrixDisabled}
+              title="Generate Matrix"
+            >
+              <template if:true={matrixLoading}>
+                <lightning-icon
+                  icon-name="utility:spinner"
+                  size="x-small"
+                  class="spin-icon"
+                ></lightning-icon>
+              </template>
+              <template if:false={matrixLoading}>
+                <lightning-icon
+                  icon-name="utility:table"
+                  size="x-small"
+                  inverse
+                  variant="inverse"
+                ></lightning-icon>
+              </template>
+              {matrixGenerateLabel}
+            </button>
+          </div>
+        </div>
+      </template>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════
+             KPI CARD VIEW
+        ════════════════════════════════════════════════════════════ -->
+    <template if:true={isKPIMode}>
+      <div class="kpi-container">
+        <div class="kpi-card">
+          <div class="kpi-label">{kpiLabel}</div>
+          <div class="kpi-value">{kpiValue}</div>
+          <div class="kpi-footer">
+            <lightning-icon
+              icon-name="utility:trending_up"
+              size="xx-small"
+              class="kpi-trend-icon"
+            ></lightning-icon>
+            Live Data
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════
+             TABLE / MATRIX VIEW
+        ════════════════════════════════════════════════════════════ -->
+    <template if:false={isKPIMode}>
+      <!-- MATRIX TABLE VIEW -->
+      <template if:true={_localIsMatrixMode}>
+        <!-- Large Dataset Warning / Export Banner -->
+        <template if:true={isLargeMatrixDataset}>
+          <div
+            class="slds-notify slds-notify_alert slds-theme_warning slds-m-bottom_medium"
+            role="alert"
+            style="
+              border-radius: 4px;
+              justify-content: space-between;
+              padding: 12px 24px;
+              border: 1px solid #dddbda;
+            "
+          >
+            <div style="display: flex; align-items: center">
+              <lightning-icon
+                icon-name="utility:warning"
+                alternative-text="Warning"
+                size="small"
+                variant="warning"
+                class="slds-m-right_medium"
+              ></lightning-icon>
+              <div
+                class="slds-text-heading_small"
+                style="font-weight: 500; color: #333"
+              >
+                This dataset has {totalRecords} rows — too large for interactive
+                view. Configure your groupings below and click the button to
+                export the Matrix report.
+              </div>
+            </div>
+            <button
+              class="btn-save slds-m-left_large"
+              onclick={handleExportMatrixOnDemand}
+              disabled={exportInProgress}
+              style="
+                white-space: nowrap;
+                height: 36px;
+                padding: 0 16px;
+                border-radius: 4px;
+              "
+            >
+              <template if:true={exportInProgress}>
+                <lightning-icon
+                  icon-name="utility:spinner"
+                  size="x-small"
+                  class="spin-icon slds-m-right_xx-small"
+                ></lightning-icon>
+                Exporting...
+              </template>
+              <template if:false={exportInProgress}>
+                <lightning-icon
+                  icon-name="utility:download"
+                  size="x-small"
+                  inverse
+                  variant="inverse"
+                  class="slds-m-right_xx-small"
+                ></lightning-icon>
+                Export Matrix via Email
+              </template>
+            </button>
+          </div>
+        </template>
+
+        <template if:false={isLargeMatrixDataset}>
+          <!-- ── Skeleton Loader ────────────────────────────────────────
+                     Apex call chal rahi hai — shimmer animation dikhao.
+                     Actual column count nahi pata abhi, isliye fixed columns.
+                ──────────────────────────────────────────────────────────── -->
+          <template if:true={matrixLoading}>
+            <div class="matrix-skeleton-wrapper">
+              <!-- Header skeleton -->
+              <div class="skeleton-header-row">
+                <div
+                  class="skeleton-cell skeleton-label-cell slds-is-animating"
+                ></div>
+                <div class="skeleton-cell slds-is-animating"></div>
+                <div class="skeleton-cell slds-is-animating"></div>
+                <div class="skeleton-cell slds-is-animating"></div>
+                <div class="skeleton-cell slds-is-animating"></div>
+                <div class="skeleton-cell slds-is-animating"></div>
+              </div>
+              <!-- Body skeleton rows -->
+              <template iterator:it={skeletonRows}>
+                <div key={it.value.key} class="skeleton-data-row">
+                  <div
+                    class="skeleton-cell skeleton-label-cell slds-is-animating"
+                  ></div>
+                  <div class="skeleton-cell slds-is-animating"></div>
+                  <div class="skeleton-cell slds-is-animating"></div>
+                  <div class="skeleton-cell slds-is-animating"></div>
+                  <div class="skeleton-cell slds-is-animating"></div>
+                  <div class="skeleton-cell slds-is-animating"></div>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <!-- ── Error State ────────────────────────────────────────────── -->
+          <template if:true={matrixError}>
+            <div
+              class="slds-notify slds-notify_alert slds-theme_error"
+              role="alert"
+            >
+              <span class="slds-assistive-text">Error</span>
+              <lightning-icon
+                icon-name="utility:error"
+                alternative-text="Error"
+                size="small"
+                class="slds-m-right_x-small"
+              >
+              </lightning-icon>
+              {matrixError}
+            </div>
+          </template>
+
+          <!-- ── Matrix Limit Exceeded Warning State ────────────────────── -->
+          <template if:true={_matrixLimitExceeded}>
+            <div
+              class="slds-notify slds-notify_alert slds-theme_info slds-m-bottom_medium"
+              role="alert"
+              style="
+                border-radius: 4px;
+                justify-content: space-between;
+                padding: 12px 24px;
+                border: 1px solid #dddbda;
+                background-color: #f3f2f1;
+                color: #333;
+              "
+            >
+              <div style="display: flex; align-items: center">
+                <lightning-icon
+                  icon-name="utility:info"
+                  alternative-text="Info"
+                  size="small"
+                  variant="info"
+                  class="slds-m-right_medium"
+                ></lightning-icon>
+                <div
+                  class="slds-text-heading_small"
+                  style="font-weight: 500; color: #333"
+                >
+                  Live matrix rendering is optimized for up to 45,000 records.
+                  Since your current filters match
+                  <strong>{_matrixLimitCount}</strong> records, please click the
+                  button to generate and email the complete report.
+                </div>
+              </div>
+              <button
+                class="btn-save slds-m-left_large"
+                onclick={handleEmailMatrixReport}
+                disabled={matrixLoading}
+                style="
+                  white-space: nowrap;
+                  height: 36px;
+                  padding: 0 16px;
+                  border-radius: 4px;
+                "
+              >
+                <template if:true={matrixLoading}>
+                  <lightning-icon
+                    icon-name="utility:spinner"
+                    size="x-small"
+                    class="spin-icon slds-m-right_xx-small"
+                  ></lightning-icon>
+                  Processing...
+                </template>
+                <template if:false={matrixLoading}>
+                  <lightning-icon
+                    icon-name="utility:email"
+                    size="x-small"
+                    inverse
+                    variant="inverse"
+                    class="slds-m-right_xx-small"
+                  ></lightning-icon>
+                  Email Full Matrix (Excel)
+                </template>
+              </button>
+            </div>
+          </template>
+
+          <!-- ── Matrix Table ─────────────────────────────────────────────
+                     matrixLoading false hone ke baad render hoga.
+                     vsRows = virtual scroll engine se aayi window slice.
+                ──────────────────────────────────────────────────────────── -->
+          <template if:false={matrixLoading}>
+            <template if:false={matrixError}>
+              <template if:true={_isMatrixMode}>
+                <!-- Status bar — row count + virtual scroll indicator -->
+                <template if:true={showMatrixSetupState}>
+                  <div class="matrix-setup-state">
+                    Select Matrix groupings and click Generate Matrix.
+                  </div>
+                </template>
+
+                <template if:true={isMatrixJobActive}>
+                  <div class="matrix-processing-state">
+                    <lightning-icon
+                      icon-name="utility:spinner"
+                      size="small"
+                      class="spin-icon slds-m-right_small"
+                    ></lightning-icon>
+                    <div>
+                      <div class="matrix-processing-title">
+                        Matrix generation is {matrixRequestStatus}
+                      </div>
+                      <div class="matrix-processing-message">
+                        {matrixProcessingMessage}
+                      </div>
+                      <div class="matrix-processing-progress">
+                        Progress: {matrixProgress}%
+                      </div>
+                    </div>
+                  </div>
+                </template>
+
+                <template if:true={hasMatrixResult}>
+                  <div class="matrix-status-bar">
+                    <span class="status-count">{matrixStatusText}</span>
+                    <template if:true={hasMoreRowsThanWindow}>
+                      <span class="status-hint">
+                        (Scroll to view — only visible rows are rendered)
+                      </span>
+                    </template>
+                  </div>
+
+                  <!-- ── Scroll container ─────────────────────────────────
+                             Fixed height + overflow-y: auto → scroll yahan hoga.
+                             onscroll yahan capture hoga.
+                        ────────────────────────────────────────────────────── -->
+                  <div
+                    class="matrix-scroll-container"
+                    onkeydown={handleMatrixKeyDown}
+                    onscroll={_onScroll}
+                    tabindex="0"
+                  >
+                    <!--
+                                Total height spacer — scroll bar correct size ke liye.
+                                Isko table ke bahar rakhte hain taaki tbody mein
+                                fake rows na dikhein.
+                                style="height: Npx" total virtual height set karta hai.
+                            -->
+                    <div
+                      class="matrix-virtual-total"
+                      style={virtualTotalHeightStyle}
+                    >
+                      <!-- ── Sticky Header (position: sticky top: 0) ── -->
+                      <table class="matrix-table" role="grid">
+                        <thead class="matrix-thead-sticky">
+                          <!-- Row field label header row
+                                             (top-left corner cell) -->
+                          <tr class="matrix-header-corner-row">
+                            <th
+                              class="matrix-corner-cell freeze-col"
+                              scope="col"
+                              style={freezeColStyle}
+                            >
+                              <!-- Row field labels (tabular flex) -->
+                              <div
+                                style="display: flex; width: 100%; height: 100%"
+                              >
+                                <template if:true={matrixResult}>
+                                  <template
+                                    for:each={matrixResult.rowFieldLabels}
+                                    for:item="lbl"
+                                  >
+                                    <div
+                                      key={lbl}
+                                      style="
+                                        flex: 0 0 150px;
+                                        padding: 8px 12px;
+                                        border-right: 1px solid #c9c9c9;
+                                        display: flex;
+                                        align-items: flex-end;
+                                        justify-content: flex-start;
+                                        background: #f3f3f3;
+                                        font-weight: 600;
+                                      "
+                                    >
+                                      {lbl}
+                                    </div>
+                                  </template>
+                                </template>
+                              </div>
+                            </th>
+                            <!-- Top-level col headers (level 0) -->
+                            <template
+                              for:each={matrixColHeadersLevel0}
+                              for:item="colH"
+                            >
+                              <th
+                                key={colH.key}
+                                colspan={colH.colspan}
+                                class="matrix-col-header"
+                                scope="colgroup"
+                              >
+                                {colH.label}
+                              </th>
+                            </template>
+                          </tr>
+
+                          <!-- Sub-level col headers (level 1, 2, ...) -->
+                          <template
+                            for:each={matrixColHeadersDeep}
+                            for:item="headerRow"
+                          >
+                            <tr
+                              key={headerRow.key}
+                              class="matrix-header-sub-row"
+                            >
+                              <!-- Empty corner for sub-rows -->
+                              <th
+                                class="matrix-corner-cell freeze-col"
+                                scope="col"
+                                style={freezeColStyle}
+                              >
+                                <div
+                                  style="
+                                    display: flex;
+                                    width: 100%;
+                                    justify-content: flex-end;
+                                    padding-right: 12px;
+                                    font-weight: 400;
+                                    color: #666;
+                                  "
+                                >
+                                  {headerRow.fieldLabel}
+                                </div>
+                              </th>
+                              <template
+                                for:each={headerRow.headers}
+                                for:item="colH"
+                              >
+                                <th
+                                  key={colH.key}
+                                  colspan={colH.colspan}
+                                  class="matrix-col-sub-header"
+                                  scope="col"
+                                >
+                                  {colH.label}
+                                </th>
+                              </template>
+                            </tr>
+                          </template>
+                        </thead>
+
+                        <tbody>
+                          <!-- ── Spacer Top ────────────────────────
+                                             Rows jo scroll se upar chali gayi
+                                             unki height compensate karo.
+                                             Invisible row — layout maintain karta hai.
+                                        ──────────────────────────────────────── -->
+                          <tr
+                            class="matrix-spacer-row"
+                            aria-hidden="true"
+                            style={spacerTopStyle}
+                          >
+                            <td colspan={matrixTableColumnCount}></td>
+                          </tr>
+
+                          <!-- ── Visible Window Rows ───────────────
+                                             Sirf yeh ~50 rows DOM mein hain.
+                                             vsRows = engine.getWindowSlice().rows
+                                        ──────────────────────────────────────── -->
+                          <template for:each={enrichedVsRows} for:item="row">
+                            <tr
+                              key={row.key}
+                              class={row.rowClass}
+                              data-row-key={row.key}
+                              aria-level={row.ariaLevel}
+                            >
+                              <!-- Row label cell (sticky left) -->
+                              <td
+                                class="matrix-row-label-cell freeze-col"
+                                style={freezeColStyle}
+                                onclick={handleGroupToggle}
+                                data-row-key={row.key}
+                                title={row.label}
+                              >
+                                <div
+                                  style="
+                                    display: flex;
+                                    width: 100%;
+                                    height: 100%;
+                                  "
+                                >
+                                  <template
+                                    for:each={row.tabularLabels}
+                                    for:item="tabLbl"
+                                  >
+                                    <div
+                                      key={tabLbl.key}
+                                      style={tabLbl.style}
+                                      title={tabLbl.text}
+                                    >
+                                      <template if:true={tabLbl.isCollapsible}>
+                                        <lightning-icon
+                                          icon-name={row.collapseIcon}
+                                          size="xx-small"
+                                          class="collapse-toggle-icon"
+                                          alternative-text="Toggle group"
+                                        >
+                                        </lightning-icon>
+                                      </template>
+                                      <span class="row-label-text">
+                                        {tabLbl.text}
+                                      </span>
+                                    </div>
+                                  </template>
+                                </div>
+                              </td>
+
+                              <!-- Data cells -->
+                              <template for:each={row.cells} for:item="cell">
+                                <td
+                                  key={cell.key}
+                                  class={cell.cellClass}
+                                  title={cell.rawTitle}
+                                >
+                                  {cell.value}
+                                </td>
+                              </template>
+                            </tr>
+                          </template>
+
+                          <!-- ── Spacer Bottom ──────────────────────
+                                             Rows jo abhi scroll se neeche hain
+                                             unki height compensate karo.
+                                        ──────────────────────────────────────── -->
+                          <tr
+                            class="matrix-spacer-row"
+                            aria-hidden="true"
+                            style={spacerBotStyle}
+                          >
+                            <td colspan={matrixTableColumnCount}></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <!-- /matrix-virtual-total -->
+                  </div>
+                  <!-- /matrix-scroll-container -->
+                </template>
+              </template>
+            </template>
+          </template>
+        </template>
+      </template>
+
+      <!-- REGULAR TABLE VIEW -->
+      <template if:false={_localIsMatrixMode}>
+        <div class="table-scroll" onscroll={handleTableScroll}>
+          <table role="grid" aria-label={tableName}>
+            <thead>
+              <!-- Matrix Super Header (Level 1) -->
+              <template if:true={hasStackedHeaders}>
+                <tr class="matrix-super-header">
+                  <template if:true={showCheckboxColumn}>
+                    <th class="matrix-total-label"></th>
+                  </template>
+                  <th
+                    colspan={rowFieldsCount}
+                    class="matrix-row-group-header-label"
+                  ></th>
+                  <template for:each={matrixStackedHeaders} for:item="sh">
+                    <th
+                      key={sh.label}
+                      colspan={sh.colspan}
+                      class="matrix-col-group-label"
+                    >
+                      {sh.label}
+                    </th>
+                  </template>
+                  <th colspan={valKeysCount} class="matrix-total-label">
+                    Total
+                  </th>
+                </tr>
+              </template>
+
+              <template if:true={_isMatrixMode}>
+                <tr class="matrix-super-header">
+                  <template if:true={showCheckboxColumn}>
+                    <th class="matrix-total-label"></th>
+                  </template>
+                  <th
+                    colspan={rowFieldsCount}
+                    class="matrix-row-group-header-label"
+                  >
+                    Row Groups
+                  </th>
+                  <template if:false={hasStackedHeaders}>
+                    <template if:true={pivotColsCount}>
+                      <th
+                        colspan={pivotColsCount}
+                        class="matrix-col-group-label"
+                      >
+                        {_columnGroupLabel}
+                      </th>
+                    </template>
+                  </template>
+                  <template if:true={hasStackedHeaders}>
+                    <template for:each={matrixHeaderRow2} for:item="h">
+                      <th
+                        key={h.key}
+                        class="matrix-col-group-label sortable"
+                        data-key={h.key}
+                        onclick={handleSort}
+                      >
+                        <div class="th-inner-pivot">
+                          {h.label}
+                          <span class="sort-wrap">
+                            <template if:true={h.isSorted}>
+                              <template if:true={h.isSortedAsc}>
+                                <span class="sort-icon sort-active"
+                                  >&#x25B2;</span
+                                >
+                              </template>
+                              <template if:false={h.isSortedAsc}>
+                                <span class="sort-icon sort-active"
+                                  >&#x25BC;</span
+                                >
+                              </template>
+                            </template>
+                            <template if:false={h.isSorted}>
+                              <span class="sort-icon sort-idle"
+                                >&#x25B2;&#x25BC;</span
+                              >
+                            </template>
+                          </span>
+                        </div>
+                      </th>
+                    </template>
+                  </template>
+                  <template if:false={hasStackedHeaders}>
+                    <th
+                      class="matrix-total-label sortable"
+                      data-key="grand_total"
+                      onclick={handleSort}
+                    >
+                      <div class="th-inner-pivot">
+                        Total
+                        <span class="sort-wrap">
+                          <template if:true={isTotalSorted}>
+                            <template if:true={isTotalSortedAsc}>
+                              <span class="sort-icon sort-active"
+                                >&#x25B2;</span
+                              >
+                            </template>
+                            <template if:false={isTotalSortedAsc}>
+                              <span class="sort-icon sort-active"
+                                >&#x25BC;</span
+                              >
+                            </template>
+                          </template>
+                          <template if:false={isTotalSorted}>
+                            <span class="sort-icon sort-idle"
+                              >&#x25B2;&#x25BC;</span
+                            >
+                          </template>
+                        </span>
+                      </div>
+                    </th>
+                  </template>
+                </tr>
+              </template>
+
+              <tr>
+                <!-- ✅ Checkbox Column Header -->
+                <template if:true={showCheckboxColumn}>
+                  <th class="checkbox-col-header" scope="col">
+                    <template if:false={_isMatrixMode}>
+                      <div class="checkbox-wrap">
+                        <input
+                          type="checkbox"
+                          class="dt-checkbox"
+                          checked={isAllSelectedOnPage}
+                          onchange={handleSelectAll}
+                          title="Select all rows on this page"
+                          aria-label="Select all rows"
+                        />
+                      </div>
+                    </template>
+                  </th>
+                </template>
+
+                <!-- Data Column Headers -->
+                <template for:each={visibleColumns} for:item="col">
+                  <th
+                    key={col.key}
+                    data-key={col.key}
+                    onclick={handleSort}
+                    class={col.headerClass}
+                    scope="col"
+                    aria-sort={col.ariaSort}
+                    draggable="true"
+                    ondragstart={handleDragStart}
+                    ondragover={handleDragOver}
+                    ondrop={handleDrop}
+                  >
+                    <div class="th-inner">
+                      <span class="th-label">{col.label}</span>
+                      <template if:true={col.isFiltered}>
+                        <span
+                          class="filtered-funnel-icon"
+                          title="Column is filtered"
+                        >
+                          <lightning-icon
+                            icon-name="utility:filter"
+                            size="xx-small"
+                          ></lightning-icon>
+                        </span>
+                      </template>
+                      <template if:false={_isMatrixMode}>
+                        <span class="sort-wrap">
+                          <template if:true={col.isSorted}>
+                            <template if:true={col.isSortedAsc}>
+                              <span class="sort-icon sort-active"
+                                >&#x25B2;</span
+                              >
+                            </template>
+                            <template if:false={col.isSortedAsc}>
+                              <span class="sort-icon sort-active"
+                                >&#x25BC;</span
+                              >
+                            </template>
+                          </template>
+                          <template if:false={col.isSorted}>
+                            <span class="sort-icon sort-idle"
+                              >&#x25B2;&#x25BC;</span
+                            >
+                          </template>
+                        </span>
+                      </template>
+                    </div>
+                  </th>
+                </template>
+
+                <!-- Action Column Header (Hidden in Matrix Mode) -->
+                <template if:true={showRowActions}>
+                  <th class="action-col-header" scope="col">Actions</th>
+                </template>
+              </tr>
+            </thead>
+            <tbody>
+              <template if:false={_isVirtualMode}>
+                <template for:each={displayRows} for:item="row">
+                  <tr key={row.recordId} class={row.rowClass}>
+                    <!-- ✅ Checkbox Column Cell -->
+                    <template if:true={showCheckboxColumn}>
+                      <td class="checkbox-col-cell">
+                        <template if:false={row.hideCheckbox}>
+                          <div class="checkbox-wrap">
+                            <input
+                              type="checkbox"
+                              class="dt-checkbox"
+                              checked={row.isSelected}
+                              data-id={row.recordId}
+                              onchange={handleRowSelect}
+                              aria-label="Select row"
+                            />
+                          </div>
+                        </template>
+                      </td>
+                    </template>
+
+                    <!-- Data Cells -->
+                    <template for:each={row.cells} for:item="cell">
+                      <td key={cell.key} class={cell.cellClass}>
+                        <div class="cell">
+                          <c-table-cell
+                            cell={cell}
+                            record-id={row.recordId}
+                            oncellchange={handleCellChange}
+                            onlookupselect={handleLookupSelect}
+                            onlookupclear={handleLookupClear}
+                          >
+                          </c-table-cell>
+                        </div>
+                      </td>
+                    </template>
+
+                    <!-- Action Column (Hidden in Matrix Mode) -->
+                    <template if:true={showRowActions}>
+                      <td class="action-cell">
+                        <template if:false={row.isFooter}>
+                          <div class="action-cell-inner">
+                            <lightning-button-icon
+                              icon-name="utility:preview"
+                              alternative-text="View"
+                              title="View Record"
+                              variant="border-filled"
+                              size="small"
+                              data-id={row.recordId}
+                              onclick={handleViewRecord}
+                              class="action-btn"
+                            >
+                            </lightning-button-icon>
+
+                            <lightning-button-icon
+                              icon-name="utility:delete"
+                              alternative-text="Delete"
+                              title="Delete Record"
+                              variant="border-filled"
+                              size="small"
+                              data-id={row.recordId}
+                              onclick={handleDelete}
+                              class="action-btn action-btn-delete"
+                            >
+                            </lightning-button-icon>
+                          </div>
+                        </template>
+                      </td>
+                    </template>
+                  </tr>
+                </template>
+              </template>
+
+              <template if:true={_isVirtualMode}>
+                <c-virtual-table-viewport
+                  table-name={tableName}
+                  parent-id={recordId}
+                  columns={visibleColumns}
+                  actions={_customActions}
+                  hide-row-actions={_hideRowActions}
+                  show-checkbox-column={showCheckboxColumn}
+                  oncellchange={handleCellChange}
+                  onrowaction={handleRowAction}
+                  onrowselection={handleRowSelect}
+                  onlookupselect={handleLookupSelect}
+                  onlookupclear={handleLookupClear}
+                  onrowcountchange={handleVirtualRowCountChange}
+                ></c-virtual-table-viewport>
+              </template>
+
+              <!-- Empty State -->
+              <template if:true={isEmptyState}>
+                <tr>
+                  <td colspan="100" class="empty-state-cell">
+                    <div class="empty-state-illustration">
+                      <lightning-illustration
+                        title="No records found"
+                        message="Try adjusting or clearing your filters."
+                        illustration-name={_illustrationName}
+                        class="slds-m-around_large"
+                      >
+                      </lightning-illustration>
+                      <template if:true={hasActiveFilters}>
+                        <button
+                          class="btn-link slds-m-top_medium"
+                          onclick={handleClearFilters}
+                        >
+                          Clear All Filters
+                        </button>
+                      </template>
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </template>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════
+             FOOTER
+        ════════════════════════════════════════════════════════════ -->
+    <template if:false={isWidgetMode}>
+      <template if:false={_localIsMatrixMode}>
+        <div class="table-footer">
+          <span class="page-info">{recordCountLabel}</span>
+          <template if:false={_isVirtualMode}>
+            <c-pagination
+              page-size={pageSize}
+              totalrecords={totalRecords}
+              onpagination={handlePageChange}
+            >
+            </c-pagination>
+          </template>
+        </div>
+      </template>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════
+             MODALS
+        ════════════════════════════════════════════════════════════ -->
+
+    <!-- Column Manager -->
+    <template if:true={_showColumnManager}>
+      <c-table-column-manager
+        columns={columns}
+        onapply={handleColumnsApply}
+        oncancel={handleCloseColumnManager}
+      >
+      </c-table-column-manager>
+    </template>
+
+    <!-- Data Import Module (Modal) -->
+    <template if:true={_showImporter}>
+      <c-dynamic-table-importer
+        table-name={tableName}
+        columns={columns}
+        parent-id={recordId}
+        onimportsuccess={handleImportSuccess}
+        onclose={handleCloseImport}
+      >
+      </c-dynamic-table-importer>
+    </template>
+  </div>
+  <!-- ═══════════════════════════════════════════════════════════
+         ACTION MODAL (Flow / Apex Results)
+    ════════════════════════════════════════════════════════════ -->
+  <template if:true={_showActionModal}>
+    <section
+      role="dialog"
+      tabindex="-1"
+      class="slds-modal slds-fade-in-open slds-modal_small"
+    >
+      <div class="slds-modal__container">
+        <header class="slds-modal__header">
+          <button
+            class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+            title="Close"
+            onclick={handleCloseModal}
+          >
+            <lightning-icon
+              icon-name="utility:close"
+              size="small"
+              variant="inverse"
+            ></lightning-icon>
+            <span class="slds-assistive-text">Close</span>
+          </button>
+          <h2 class="slds-text-heading_medium slds-hyphenate">{_modalTitle}</h2>
+        </header>
+        <div
+          class="slds-modal__content slds-p-around_medium"
+          style="min-height: 200px; position: relative"
+        >
+          <template if:true={_isModalLoading}>
+            <lightning-spinner
+              alternative-text="Loading"
+              size="medium"
+            ></lightning-spinner>
+          </template>
+
+          <template if:true={_modalFlowName}>
+            <lightning-flow
+              flow-api-name={_modalFlowName}
+              flow-input-variables={_modalFlowInputVariables}
+              onstatuschange={handleFlowStatusChange}
+            >
+            </lightning-flow>
+          </template>
+
+          <template if:true={_modalMessage}>
+            <div class="slds-text-align_center slds-p-around_large">
+              <p class="slds-text-heading_small">{_modalMessage}</p>
+            </div>
+          </template>
+        </div>
+        <footer class="slds-modal__footer">
+          <button
+            class="slds-button slds-button_neutral"
+            onclick={handleCloseModal}
+          >
+            Close
+          </button>
+        </footer>
+      </div>
+    </section>
+
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+
+  <!-- Floating Unsaved Changes Footer Bar (ED-03) -->
+  <template if:true={hasEdits}>
+    <div class="unsaved-changes-footer">
+      <div class="footer-content">
+        <span class="changes-count-label">{unsavedEditsLabel}</span>
+        <div class="footer-buttons">
+          <button
+            class="slds-button slds-button_neutral"
+            onclick={handleCancelEdits}
+          >
+            Cancel
+          </button>
+          <button
+            class="slds-button slds-button_brand"
+            onclick={handleSave}
+            disabled={_isSaving}
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+  <a
+    data-download-link
+    style="display: none"
+    class="slds-hide"
+    aria-hidden="true"
+  >
+  </a>
+</template>

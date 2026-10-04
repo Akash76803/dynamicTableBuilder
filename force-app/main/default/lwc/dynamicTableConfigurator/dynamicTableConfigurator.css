@@ -1,0 +1,402 @@
+:host {
+  --brand-gradient: linear-gradient(135deg, #005fb2 0%, #0070d2 100%);
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  display: block;
+}
+
+/* ── Container ──────────────────────────────────────────── */
+.configurator-container {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  min-height: 400px;
+  border: none;
+  overflow: visible;
+}
+
+.title-gradient {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+
+/* ── Animations ─────────────────────────────────────────── */
+.fade-in {
+  animation: fadeIn 0.35s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Table List Dashboard ───────────────────────────────── */
+.table-list-container {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+}
+
+.date-col {
+  color: #706e6b;
+  font-size: 0.75rem;
+}
+
+.icon-danger {
+  --sds-c-button-color-border: #c23934;
+  --sds-c-icon-color-foreground-default: #c23934;
+}
+
+/* ── Config Sections ────────────────────────────────────── */
+.config-section {
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.config-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.875rem;
+  background: #f7f7f7;
+  border-bottom: 1px solid #e8e8e8;
+  gap: 0.75rem;
+}
+
+.config-section__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+}
+
+.config-section__body {
+  background: #ffffff;
+}
+
+/* ── Feature Toggles ────────────────────────────────────── */
+.feature-toggles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 0.5rem;
+}
+
+.feature-toggle-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  background: #fafafa;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.feature-toggle-item:hover {
+  border-color: #0070d2;
+  box-shadow: 0 1px 6px rgba(0, 112, 210, 0.1);
+}
+
+.feature-toggle-item--danger {
+  border-color: #f4ddd9;
+  background: #fdf7f6;
+}
+
+.feature-toggle-item--danger:hover {
+  border-color: #c23934;
+  box-shadow: 0 1px 6px rgba(194, 57, 52, 0.1);
+}
+
+.feature-toggle-item__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.feature-toggle-item__label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.feature-toggle-item__hint {
+  font-size: 0.68rem;
+  color: #706e6b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Column Section ─────────────────────────────────────── */
+.col-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.column-search-input {
+  min-width: 160px;
+}
+
+.column-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #0070d2;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 999px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
+/* ── Column Config Table ────────────────────────────────── */
+.col-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.col-config-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.col-th {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #706e6b;
+  border-bottom: 1px solid #e8e8e8;
+  background: #fafafa;
+  white-space: nowrap;
+}
+
+.col-th--reorder {
+  width: 32px;
+}
+.col-th--type {
+  width: 120px;
+}
+.col-th--ref {
+  width: 180px;
+}
+.col-th--toggles {
+  width: 170px;
+}
+.col-th--del {
+  width: 32px;
+}
+
+.col-config-row {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.15s ease;
+}
+
+.col-config-row:last-child {
+  border-bottom: none;
+}
+
+.col-config-row:hover {
+  background: #f8fbff;
+}
+
+.col-td {
+  padding: 0.4rem 0.5rem;
+  vertical-align: middle;
+}
+
+.col-td--reorder {
+  padding: 0 0.25rem;
+  text-align: center;
+}
+
+.col-td--type,
+.col-td--ref {
+  vertical-align: top;
+  padding-top: 0.4rem;
+}
+
+.col-td--del {
+  text-align: center;
+}
+
+.reorder-btns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* Make stacked inputs inside ref cell tighter */
+.col-td--ref lightning-input,
+.col-td--ref lightning-combobox {
+  display: block;
+  margin-bottom: 0.2rem;
+}
+
+.col-td--ref lightning-combobox:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Chip Toggles ───────────────────────────────────────── */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid #d8d8d8;
+  background: #f3f3f3;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #706e6b;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: #0070d2;
+  color: #0070d2;
+  background: #e8f2fb;
+}
+
+.chip--on {
+  background: #e1f5ee;
+  border-color: #0f6e56;
+  color: #0f6e56;
+}
+
+.chip--on-blue {
+  background: #e6f1fb;
+  border-color: #0070d2;
+  color: #0070d2;
+}
+
+.chip--on-warn {
+  background: #fdf7f6;
+  border-color: #c23934;
+  color: #c23934;
+}
+
+/* ── Add Column Row ─────────────────────────────────────── */
+.add-col-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.625rem;
+  border: 1px dashed #c9c9c9;
+  border-radius: 0 0 8px 8px;
+  cursor: pointer;
+  color: #706e6b;
+  font-size: 0.75rem;
+  background: #fafafa;
+  transition: all 0.15s ease;
+}
+
+.add-col-row:hover {
+  border-color: #0070d2;
+  color: #0070d2;
+  background: #f0f7ff;
+}
+
+/* ── Empty Column State ─────────────────────────────────── */
+.empty-columns-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  color: #706e6b;
+  text-align: center;
+}
+
+/* ── Compact inputs inside table cells ─────────────────── */
+.col-config-table lightning-input,
+.col-config-table lightning-combobox {
+  --sds-c-input-spacing-vertical: 0.2rem;
+}
+
+/* ── Lookup Autocomplete & Pills (For Default Filter Configurator) ── */
+.lookup-filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.lookup-pills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.lookup-input-wrap {
+  position: relative;
+  z-index: 100;
+}
+
+.lookup-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 120px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #dddbda;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.lookup-dropdown-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lookup-dropdown-item {
+  padding: 0.4rem 0.625rem;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  font-size: 0.75rem;
+  color: #333333;
+  text-align: left;
+}
+
+.lookup-dropdown-item:hover {
+  background: #f0f5ff;
+  color: #0176d3;
+}

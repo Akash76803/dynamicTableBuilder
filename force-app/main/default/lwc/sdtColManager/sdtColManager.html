@@ -1,0 +1,54 @@
+<template>
+  <div class="sdt-col-manager">
+    <!-- Header -->
+    <div class="panel-header">
+      <span class="panel-title">Columns</span>
+      <button class="panel-close-btn" onclick={handleClose} title="Close">✕</button>
+    </div>
+
+    <!-- Actions (Top) -->
+    <div class="panel-actions">
+      <button class="btn-reset" onclick={handleReset}>Reset</button>
+      <button class="btn-apply" onclick={handleApply}>Apply</button>
+    </div>
+
+    <!-- Column list -->
+    <div class="col-list">
+      <template for:each={localColumns} for:item="col" for:index="idx">
+        <div key={col.key} class="col-row">
+
+          <!-- Reorder buttons -->
+          <div class="reorder-btns">
+            <button
+              class="reorder-btn"
+              data-index={idx}
+              onclick={handleMoveUp}
+              disabled={col.isFirst}
+              title="Move Up"
+            >▲</button>
+            <button
+              class="reorder-btn"
+              data-index={idx}
+              onclick={handleMoveDown}
+              disabled={col.isLast}
+              title="Move Down"
+            >▼</button>
+          </div>
+
+          <!-- Visibility toggle -->
+          <input
+            type="checkbox"
+            class="col-visible-check"
+            checked={col.visible}
+            data-key={col.key}
+            onchange={handleVisibilityToggle}
+            title="Show / Hide column"
+          />
+
+          <!-- Column label -->
+          <span class="col-label">{col.label}</span>
+        </div>
+      </template>
+    </div>
+  </div>
+</template>

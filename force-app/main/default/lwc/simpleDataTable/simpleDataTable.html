@@ -1,0 +1,185 @@
+<template>
+  <div class="sdt-container slds-card">
+    
+    <!-- Toolbar -->
+    <div class="sdt-toolbar">
+      <div class="toolbar-left">
+        <h2 class="sdt-title">{tableName}</h2>
+        <span class="sdt-count">({filteredRows.length} records)</span>
+      </div>
+      <div class="toolbar-right">
+        <!-- Search -->
+        <div class="sdt-search">
+          <input type="text" placeholder="Search..." oninput={handleSearch} class="sdt-search-input" />
+        </div>
+
+        <!-- View Toggle -->
+        <button class="sdt-btn sdt-btn-icon" onclick={toggleViewMode} title="Toggle View Mode">
+          <template if:true={isTableView}>
+            <svg class="sdt-icon" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" fill="currentColor"/></svg>
+          </template>
+          <template if:false={isTableView}>
+            <svg class="sdt-icon" viewBox="0 0 24 24"><path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z" fill="currentColor"/></svg>
+          </template>
+        </button>
+
+        <!-- Filters Toggle -->
+        <button class={filterBtnClass} onclick={toggleFilterPanel} title="Filters">
+          <svg class="sdt-icon" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" fill="currentColor"/></svg>
+          <span>Filters</span>
+          <template if:true={hasActiveFilters}>
+            <span class="sdt-badge">{activeFilters.length}</span>
+          </template>
+        </button>
+
+        <!-- Columns Toggle -->
+        <button class={colBtnClass} onclick={toggleColManager} title="Columns">
+          <svg class="sdt-icon" viewBox="0 0 24 24"><path d="M4 5v13h17V5H4zm10 2v9h-3V7h3zM6 7h3v9H6V7zm13 9h-3V7h3v9z" fill="currentColor"/></svg>
+          <span>Columns</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Filter Chips -->
+    <template if:true={hasActiveFilters}>
+      <div class="sdt-active-filters">
+        <template for:each={activeFilters} for:item="filter">
+          <span key={filter.fieldKey} class="sdt-chip">
+            {filter.fieldLabel} {filter.operatorLabel} {filter.displayValue}
+            <button class="sdt-chip-remove" data-key={filter.fieldKey} onclick={removeFilter}>✕</button>
+          </span>
+        </template>
+        <button class="sdt-clear-all" onclick={clearAllFilters}>Clear All</button>
+      </div>
+    </template>
+
+    <!-- Main Content Area with potential side panels -->
+    <div class="sdt-main-area">
+      
+      <!-- DATA AREA -->
+      <div class="sdt-data-wrapper">
+        
+        <!-- Loading State -->
+        <template if:true={isLoading}>
+          <div class="sdt-loading">
+            <div class="sdt-spinner"></div>
+            <p>Loading data...</p>
+          </div>
+        </template>
+
+        <template if:false={isLoading}>
+          <!-- Error State -->
+          <template if:true={error}>
+            <div class="sdt-error">
+              <p>{error}</p>
+            </div>
+          </template>
+
+          <template if:false={error}>
+            <!-- Empty State -->
+            <template if:true={isEmpty}>
+              <div class="sdt-empty">
+                <p>No records found.</p>
+              </div>
+            </template>
+
+            <!-- Table View -->
+            <template if:true={showTableView}>
+              <div class="sdt-table-container">
+                <table class="sdt-table">
+                  <thead>
+                    <tr>
+                      <template for:each={visibleColumns} for:item="col">
+                        <th key={col.key}>
+                          <template if:true={col.sortable}>
+                            <a href="javascript:void(0);" class="sdt-sort-th" data-col={col.key} onclick={handleSort}>
+                              {col.label}
+                              <template if:true={col.isSorted}>
+                                <span class="sdt-sort-icon">{col.sortIcon}</span>
+                              </template>
+                            </a>
+                          </template>
+                          <template if:false={col.sortable}>
+                            {col.label}
+                          </template>
+                        </th>
+                      </template>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={filteredRows} for:item="row">
+                      <tr key={row.recordId}>
+                        <template for:each={row.cells} for:item="cell">
+                          <td key={cell.key}>{cell.value}</td>
+                        </template>
+                      </tr>
+                    </template>
+                  </tbody>
+                  <template if:true={aggregateRow}>
+                    <tfoot>
+                      <tr class="sdt-aggregate-row">
+                        <template for:each={aggregateRow} for:item="cell">
+                          <td key={cell.key} class={cell.className}>{cell.value}</td>
+                        </template>
+                      </tr>
+                    </tfoot>
+                  </template>
+                </table>
+              </div>
+            </template>
+
+            <!-- Card View -->
+            <template if:true={showCardView}>
+              <div class="sdt-card-grid">
+                <template for:each={filteredRows} for:item="row">
+                  <div key={row.recordId} class="sdt-card">
+                    <template for:each={row.cardCells} for:item="cell">
+                      <div key={cell.key} class="sdt-card-field">
+                        <span class="sdt-card-label">{cell.label}</span>
+                        <span class="sdt-card-value">{cell.value}</span>
+                      </div>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <!-- Pagination Footer -->
+            <template if:false={isEmpty}>
+              <div class="sdt-pagination">
+                <button class="sdt-btn" onclick={handlePrevPage} disabled={isFirstPage}>Previous</button>
+                <span class="sdt-page-info">{paginationText}</span>
+                <button class="sdt-btn" onclick={handleNextPage} disabled={isLastPage}>Next</button>
+              </div>
+            </template>
+          </template>
+        </template>
+      </div>
+
+      <!-- Slide-out: Filter Panel -->
+      <template if:true={showFilterPanel}>
+        <div class="sdt-side-panel">
+          <c-sdt-filter-panel
+            columns={columns}
+            active-filters={activeFilters}
+            onfilterchange={handleFilterChange}
+            onclose={toggleFilterPanel}
+          ></c-sdt-filter-panel>
+        </div>
+      </template>
+
+      <!-- Slide-out: Column Manager -->
+      <template if:true={showColManager}>
+        <div class="sdt-side-panel">
+          <c-sdt-col-manager
+            columns={columns}
+            table-name={tableName}
+            oncolumnupdate={handleColumnUpdate}
+            onclose={toggleColManager}
+          ></c-sdt-col-manager>
+        </div>
+      </template>
+
+    </div>
+  </div>
+</template>

@@ -1,0 +1,1482 @@
+<template>
+  <div class="configurator-container slds-card slds-p-around_medium">
+    <!-- Header -->
+    <header
+      class="slds-m-bottom_large slds-grid slds-grid_vertical-align-center"
+    >
+      <div class="slds-media slds-media_center slds-has-flexi-truncate">
+        <div class="slds-media__figure">
+          <lightning-icon
+            icon-name="standard:custom_apps"
+            size="medium"
+          ></lightning-icon>
+        </div>
+        <div class="slds-media__body">
+          <h1 class="slds-text-heading_large slds-truncate title-gradient">
+            Dynamic Table Configurator
+          </h1>
+          <template if:true={showEditor}>
+            <p class="slds-text-color_weak">
+              {activeTable.Name}
+              <template if:true={activeTable.Name}>&nbsp;·&nbsp;</template>
+              {columnCount} column<template if:true={isPlural}>s</template>
+            </p>
+          </template>
+          <template if:false={showEditor}>
+            <p class="slds-text-color_weak">
+              Manage your enterprise data table metadata in one place.
+            </p>
+          </template>
+        </div>
+      </div>
+      <div class="slds-col_bump-left">
+        <template if:false={showEditor}>
+          <lightning-button
+            variant="brand"
+            label="New Table Config"
+            icon-name="utility:add"
+            onclick={handleNewTable}
+          ></lightning-button>
+        </template>
+        <template if:true={showEditor}>
+          <lightning-button-group>
+            <lightning-button
+              label="Back"
+              icon-name="utility:back"
+              onclick={handleBack}
+            ></lightning-button>
+            <lightning-button
+              label="Sample CSV"
+              icon-name="utility:download"
+              onclick={handleDownloadSample}
+            ></lightning-button>
+            <lightning-button
+              variant="brand"
+              label="Save"
+              icon-name="utility:save"
+              onclick={handleSave}
+            ></lightning-button>
+          </lightning-button-group>
+        </template>
+      </div>
+    </header>
+
+    <!-- Spinner -->
+    <template if:true={isLoading}>
+      <lightning-spinner
+        alternative-text="Loading"
+        size="medium"
+        variant="brand"
+      ></lightning-spinner>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════
+             DASHBOARD VIEW
+        ════════════════════════════════════════════════════ -->
+    <template if:false={showEditor}>
+      <div class="fade-in">
+        <template if:true={hasTables}>
+          <div class="table-list-container">
+            <table
+              class="slds-table slds-table_bordered slds-table_fixed-layout"
+            >
+              <thead>
+                <tr class="slds-line-height_reset">
+                  <th scope="col">
+                    <div class="slds-truncate">Table Name</div>
+                  </th>
+                  <th scope="col">
+                    <div class="slds-truncate">Object</div>
+                  </th>
+                  <th scope="col" style="width: 320px">
+                    <div class="slds-truncate">Enabled Features</div>
+                  </th>
+                  <th scope="col" style="width: 80px">
+                    <div class="slds-truncate">Columns</div>
+                  </th>
+                  <th scope="col" style="width: 100px">
+                    <div class="slds-truncate">Created</div>
+                  </th>
+                  <th scope="col" style="width: 120px; text-align: center">
+                    <div class="slds-truncate">Actions</div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={tablesWithMeta} for:item="tbl">
+                  <tr key={tbl.Id}>
+                    <td>
+                      <div
+                        class="slds-truncate slds-grid slds-grid_vertical-align-center"
+                      >
+                        <strong>{tbl.Name}</strong>
+                        <lightning-button-icon
+                          class="slds-m-left_xx-small"
+                          icon-name="utility:copy"
+                          variant="bare"
+                          size="small"
+                          data-name={tbl.Name}
+                          onclick={handleCopyName}
+                          title="Copy config name"
+                        >
+                        </lightning-button-icon>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="slds-truncate">
+                        <template if:true={tbl.Object_Name__c}>
+                          <strong>{tbl.Object_Name__c}</strong>
+                          <span class="slds-m-left_xx-small text-muted" style="color: #706e6b; font-size: 0.75rem;">({tbl.Object_API_Name__c})</span>
+                        </template>
+                        <template if:false={tbl.Object_Name__c}>
+                          <span class="text-muted" style="color: #b0adab; font-style: italic;">{tbl.Object_API_Name__c}</span>
+                        </template>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="slds-grid slds-wrap" style="gap: 4px;">
+                        <template if:true={tbl.Enable_Filters__c}>
+                          <span class="slds-badge slds-theme_success" style="font-size: 0.65rem; padding: 2px 6px; font-weight: 600; line-height: 1.2;">Filters</span>
+                        </template>
+                        <template if:true={tbl.Enable_Matrix_View__c}>
+                          <span class="slds-badge slds-theme_info" style="font-size: 0.65rem; padding: 2px 6px; font-weight: 600; line-height: 1.2;">Matrix</span>
+                        </template>
+                        <template if:true={tbl.Enable_Views__c}>
+                          <span class="slds-badge slds-theme_warning" style="font-size: 0.65rem; padding: 2px 6px; font-weight: 600; line-height: 1.2;">Views</span>
+                        </template>
+                        <template if:true={tbl.Enable_Import__c}>
+                          <span class="slds-badge" style="font-size: 0.65rem; padding: 2px 6px; font-weight: 600; line-height: 1.2; background-color: #f3f3f3; color: #444;">Import</span>
+                        </template>
+                        <template if:true={tbl.Enable_Export__c}>
+                          <span class="slds-badge" style="font-size: 0.65rem; padding: 2px 6px; font-weight: 600; line-height: 1.2; background-color: #f3f3f3; color: #444;">Export</span>
+                        </template>
+                        <template if:true={tbl.Enable_New_Record__c}>
+                          <span class="slds-badge" style="font-size: 0.65rem; padding: 2px 6px; font-weight: 600; line-height: 1.2; background-color: #f3f3f3; color: #444;">New</span>
+                        </template>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="slds-truncate">
+                        <lightning-badge label={tbl.colCount}></lightning-badge>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="slds-truncate date-col">
+                        {tbl.formattedDate}
+                      </div>
+                    </td>
+                    <td class="slds-text-align_center">
+                      <lightning-button-icon
+                        icon-name="utility:copy"
+                        variant="border-filled"
+                        data-id={tbl.Id}
+                        onclick={handleClone}
+                        title="Clone"
+                        class="slds-m-right_x-small"
+                      ></lightning-button-icon>
+                      <lightning-button-icon
+                        icon-name="utility:edit"
+                        variant="border-filled"
+                        data-id={tbl.Id}
+                        onclick={handleEdit}
+                        title="Edit"
+                        class="slds-m-right_x-small"
+                      ></lightning-button-icon>
+                      <lightning-button-icon
+                        icon-name="utility:delete"
+                        variant="border-filled"
+                        class="icon-danger"
+                        data-id={tbl.Id}
+                        onclick={handleDelete}
+                        title="Delete"
+                      ></lightning-button-icon>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <template if:false={hasTables}>
+          <div class="slds-illustration slds-illustration_small">
+            <div class="slds-text-longform">
+              <h3 class="slds-text-heading_medium">
+                No Table Configurations Found
+              </h3>
+              <p>Click "New Table Config" to get started.</p>
+            </div>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════
+             EDITOR VIEW
+        ════════════════════════════════════════════════════ -->
+    <template if:true={showEditor}>
+      <div class="editor-view fade-in">
+        <!-- SECTION 1: Basic Details -->
+        <div class="config-section slds-m-bottom_small">
+          <div class="config-section__header">
+            <span class="config-section__title">
+              <lightning-icon
+                icon-name="utility:table"
+                size="x-small"
+                class="slds-m-right_x-small"
+              ></lightning-icon>
+              Table Basic Details
+            </span>
+            <lightning-icon
+              icon-name="utility:chevronup"
+              size="x-small"
+            ></lightning-icon>
+          </div>
+          <div
+            class="config-section__body slds-grid slds-wrap slds-p-around_small"
+          >
+            <div
+              class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small"
+            >
+              <lightning-input
+                label="Config Name"
+                value={activeTable.Name}
+                onchange={handleTableFieldChange}
+                data-field="Name"
+                required
+              ></lightning-input>
+            </div>
+            <div
+              class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small"
+            >
+              <lightning-input
+                label="Display Object Name"
+                value={activeTable.Object_Name__c}
+                onchange={handleTableFieldChange}
+                data-field="Object_Name__c"
+                placeholder="e.g. Account"
+              ></lightning-input>
+            </div>
+            <div
+              class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small"
+            >
+              <lightning-input
+                label="Base Object API Name"
+                value={activeTable.Object_API_Name__c}
+                onchange={handleTableFieldChange}
+                data-field="Object_API_Name__c"
+                required
+                placeholder="e.g. Account"
+              ></lightning-input>
+            </div>
+            <div
+              class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small"
+            >
+              <label class="slds-form-element__label"
+                >Empty State Illustration</label
+              >
+              <div class="slds-form-element__control">
+                <select
+                  class="slds-select"
+                  value={activeTable.Empty_State_Illustration__c}
+                  onchange={handleTableFieldChange}
+                  data-field="Empty_State_Illustration__c"
+                >
+                  <option value="">Select...</option>
+                  <template for:each={illustrationOptions} for:item="opt">
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  </template>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: Feature Toggles -->
+        <div class="config-section slds-m-bottom_small">
+          <div class="config-section__header">
+            <span class="config-section__title">
+              <lightning-icon
+                icon-name="utility:settings"
+                size="x-small"
+                class="slds-m-right_x-small"
+              ></lightning-icon>
+              Feature Visibility &amp; Behaviour
+            </span>
+            <lightning-icon
+              icon-name="utility:chevronup"
+              size="x-small"
+            ></lightning-icon>
+          </div>
+          <div class="config-section__body slds-p-around_small">
+            <div class="feature-toggles-grid">
+              <div class="feature-toggle-item">
+                <div class="feature-toggle-item__text">
+                  <span class="feature-toggle-item__label">Enable Filters</span>
+                  <span class="feature-toggle-item__hint"
+                    >Filter panel &amp; search chips</span
+                  >
+                </div>
+                <lightning-input
+                  type="toggle"
+                  label="Enable Filters"
+                  variant="label-hidden"
+                  checked={activeTable.Enable_Filters__c}
+                  onchange={handleTableFieldChange}
+                  data-field="Enable_Filters__c"
+                  message-toggle-active=""
+                  message-toggle-inactive=""
+                ></lightning-input>
+              </div>
+              <div class="feature-toggle-item">
+                <div class="feature-toggle-item__text">
+                  <span class="feature-toggle-item__label">Matrix View</span>
+                  <span class="feature-toggle-item__hint"
+                    >Pivot / matrix report mode</span
+                  >
+                </div>
+                <lightning-input
+                  type="toggle"
+                  label="Matrix View"
+                  variant="label-hidden"
+                  checked={activeTable.Enable_Matrix_View__c}
+                  onchange={handleTableFieldChange}
+                  data-field="Enable_Matrix_View__c"
+                  message-toggle-active=""
+                  message-toggle-inactive=""
+                ></lightning-input>
+              </div>
+              <div class="feature-toggle-item">
+                <div class="feature-toggle-item__text">
+                  <span class="feature-toggle-item__label">Column Manager</span>
+                  <span class="feature-toggle-item__hint"
+                    >Show column settings btn</span
+                  >
+                </div>
+                <lightning-input
+                  type="toggle"
+                  label="Column Manager"
+                  variant="label-hidden"
+                  checked={activeTable.Enable_Column_Manager__c}
+                  onchange={handleTableFieldChange}
+                  data-field="Enable_Column_Manager__c"
+                  message-toggle-active=""
+                  message-toggle-inactive=""
+                ></lightning-input>
+              </div>
+              <div class="feature-toggle-item">
+                <div class="feature-toggle-item__text">
+                  <span class="feature-toggle-item__label">Views</span>
+                  <span class="feature-toggle-item__hint"
+                    >Saved view manager</span
+                  >
+                </div>
+                <lightning-input
+                  type="toggle"
+                  label="Views"
+                  variant="label-hidden"
+                  checked={activeTable.Enable_Views__c}
+                  onchange={handleTableFieldChange}
+                  data-field="Enable_Views__c"
+                  message-toggle-active=""
+                  message-toggle-inactive=""
+                ></lightning-input>
+              </div>
+              <div class="feature-toggle-item">
+                <div class="feature-toggle-item__text">
+                  <span class="feature-toggle-item__label">Enable Import</span>
+                  <span class="feature-toggle-item__hint"
+                    >CSV import button</span
+                  >
+                </div>
+                <lightning-input
+                  type="toggle"
+                  label="Enable Import"
+                  variant="label-hidden"
+                  checked={activeTable.Enable_Import__c}
+                  onchange={handleTableFieldChange}
+                  data-field="Enable_Import__c"
+                  message-toggle-active=""
+                  message-toggle-inactive=""
+                ></lightning-input>
+              </div>
+              <div class="feature-toggle-item">
+                <div class="feature-toggle-item__text">
+                  <span class="feature-toggle-item__label">Enable Export</span>
+                  <span class="feature-toggle-item__hint"
+                    >CSV export button</span
+                  >
+                </div>
+                <lightning-input
+                  type="toggle"
+                  label="Enable Export"
+                  variant="label-hidden"
+                  checked={activeTable.Enable_Export__c}
+                  onchange={handleTableFieldChange}
+                  data-field="Enable_Export__c"
+                  message-toggle-active=""
+                  message-toggle-inactive=""
+                ></lightning-input>
+              </div>
+              <div class="feature-toggle-item">
+                <div class="feature-toggle-item__text">
+                  <span class="feature-toggle-item__label">New Record</span>
+                  <span class="feature-toggle-item__hint"
+                    >Global new button</span
+                  >
+                </div>
+                <lightning-input
+                  type="toggle"
+                  label="New Record"
+                  variant="label-hidden"
+                  checked={activeTable.Enable_New_Record__c}
+                  onchange={handleTableFieldChange}
+                  data-field="Enable_New_Record__c"
+                  message-toggle-active=""
+                  message-toggle-inactive=""
+                ></lightning-input>
+              </div>
+              <div class="feature-toggle-item feature-toggle-item--danger">
+                <div class="feature-toggle-item__text">
+                  <span class="feature-toggle-item__label"
+                    >Hide Row Actions</span
+                  >
+                  <span class="feature-toggle-item__hint"
+                    >Remove view &amp; delete menu</span
+                  >
+                </div>
+                <lightning-input
+                  type="toggle"
+                  label="Hide Row Actions"
+                  variant="label-hidden"
+                  checked={activeTable.Hide_Row_Actions__c}
+                  onchange={handleTableFieldChange}
+                  data-field="Hide_Row_Actions__c"
+                  message-toggle-active=""
+                  message-toggle-inactive=""
+                ></lightning-input>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2.5: Access Control Overrides -->
+        <div class="config-section slds-m-bottom_small">
+          <div class="config-section__header">
+            <span class="config-section__title">
+              <lightning-icon
+                icon-name="utility:shield"
+                size="x-small"
+                class="slds-m-right_x-small"
+              ></lightning-icon>
+              Access Control &amp; Overrides
+            </span>
+            <lightning-icon
+              icon-name="utility:chevronup"
+              size="x-small"
+            ></lightning-icon>
+          </div>
+          <div class="config-section__body slds-p-around_small">
+            <p class="slds-m-bottom_small slds-text-color_weak">
+              Override feature visibility based on specific Users, Profiles,
+              Roles, or Public Groups. Higher priority (User > Profile > Role >
+              Group) wins.
+            </p>
+
+            <div
+              class="slds-grid slds-wrap slds-m-bottom_medium slds-box slds-box_xx-small"
+              style="background: #fafaf9; border-color: #e5e7eb"
+            >
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small"
+              >
+                <select
+                  class="slds-select slds-m-top_large"
+                  value={newOverride.Context_Type__c}
+                  onchange={handleOverrideChange}
+                  data-field="Context_Type__c"
+                >
+                  <option value="User">User</option>
+                  <option value="Profile">Profile</option>
+                  <option value="Role">Role</option>
+                  <option value="Public Group">Public Group</option>
+                </select>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small"
+              >
+                <lightning-input
+                  label="Context ID (15/18 char)"
+                  value={newOverride.Context_Value__c}
+                  onchange={handleOverrideChange}
+                  data-field="Context_Value__c"
+                  placeholder="e.g. 00e5g..."
+                ></lightning-input>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small"
+              >
+                <select
+                  class="slds-select slds-m-top_large"
+                  value={newOverride.Override_Enable_Export__c}
+                  onchange={handleOverrideChange}
+                  data-field="Override_Enable_Export__c"
+                >
+                  <option value="">-- Export --</option>
+                  <option value="Enabled">Enabled</option>
+                  <option value="Disabled">Disabled</option>
+                </select>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small"
+              >
+                <select
+                  class="slds-select slds-m-top_large"
+                  value={newOverride.Override_Enable_Filters__c}
+                  onchange={handleOverrideChange}
+                  data-field="Override_Enable_Filters__c"
+                >
+                  <option value="">-- Filters --</option>
+                  <option value="Enabled">Enabled</option>
+                  <option value="Disabled">Disabled</option>
+                </select>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small"
+              >
+                <select
+                  class="slds-select slds-m-top_large"
+                  value={newOverride.Override_Hide_Row_Actions__c}
+                  onchange={handleOverrideChange}
+                  data-field="Override_Hide_Row_Actions__c"
+                >
+                  <option value="">-- Row Actions --</option>
+                  <option value="Enabled">Hide</option>
+                  <option value="Disabled">Show</option>
+                </select>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small"
+              >
+                <select
+                  class="slds-select slds-m-top_large"
+                  value={newOverride.Override_Enable_Import__c}
+                  onchange={handleOverrideChange}
+                  data-field="Override_Enable_Import__c"
+                >
+                  <option value="">-- Import --</option>
+                  <option value="Enabled">Enabled</option>
+                  <option value="Disabled">Disabled</option>
+                </select>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small"
+              >
+                <select
+                  class="slds-select slds-m-top_large"
+                  value={newOverride.Override_New_Record__c}
+                  onchange={handleOverrideChange}
+                  data-field="Override_New_Record__c"
+                >
+                  <option value="">-- New Record --</option>
+                  <option value="Enabled">Enabled</option>
+                  <option value="Disabled">Disabled</option>
+                </select>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small"
+              >
+                <select
+                  class="slds-select slds-m-top_large"
+                  value={newOverride.Override_Enable_Matrix_View__c}
+                  onchange={handleOverrideChange}
+                  data-field="Override_Enable_Matrix_View__c"
+                >
+                  <option value="">-- Matrix View --</option>
+                  <option value="Enabled">Enabled</option>
+                  <option value="Disabled">Disabled</option>
+                </select>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small"
+              >
+                <select
+                  class="slds-select slds-m-top_large"
+                  value={newOverride.Override_Enable_Column_Manager__c}
+                  onchange={handleOverrideChange}
+                  data-field="Override_Enable_Column_Manager__c"
+                >
+                  <option value="">-- Col Manager --</option>
+                  <option value="Enabled">Enabled</option>
+                  <option value="Disabled">Disabled</option>
+                </select>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small"
+              >
+                <select
+                  class="slds-select slds-m-top_large"
+                  value={newOverride.Override_Enable_Views__c}
+                  onchange={handleOverrideChange}
+                  data-field="Override_Enable_Views__c"
+                >
+                  <option value="">-- Views --</option>
+                  <option value="Enabled">Enabled</option>
+                  <option value="Disabled">Disabled</option>
+                </select>
+              </div>
+              <div
+                class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4 slds-p-horizontal_x-small slds-p-bottom_small slds-p-top_large"
+              >
+                <lightning-button
+                  label="Add Override"
+                  variant="brand"
+                  onclick={handleAddOverride}
+                  class="slds-m-top_large"
+                ></lightning-button>
+              </div>
+            </div>
+
+            <template if:true={featureOverrides.length}>
+              <table class="col-config-table slds-m-top_small">
+                <thead>
+                  <tr>
+                    <th>Context Type</th>
+                    <th>Context ID</th>
+                    <th>Export</th>
+                    <th>Filters</th>
+                    <th>Row Actions</th>
+                    <th>Import</th>
+                    <th>New Record</th>
+                    <th>Matrix View</th>
+                    <th>Col Manager</th>
+                    <th>Views</th>
+                    <th style="width: 50px"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template for:each={featureOverrides} for:item="ov">
+                    <tr key={ov.Id}>
+                      <td>{ov.Context_Type__c}</td>
+                      <td>{ov.Context_Value__c}</td>
+                      <td>{ov.Override_Enable_Export__c}</td>
+                      <td>{ov.Override_Enable_Filters__c}</td>
+                      <td>{ov.Override_Hide_Row_Actions__c}</td>
+                      <td>{ov.Override_Enable_Import__c}</td>
+                      <td>{ov.Override_New_Record__c}</td>
+                      <td>{ov.Override_Enable_Matrix_View__c}</td>
+                      <td>{ov.Override_Enable_Column_Manager__c}</td>
+                      <td>{ov.Override_Enable_Views__c}</td>
+                      <td>
+                        <lightning-button-icon
+                          icon-name="utility:delete"
+                          variant="bare"
+                          alternative-text="Delete"
+                          data-id={ov.Id}
+                          onclick={handleDeleteOverride}
+                        ></lightning-button-icon>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </template>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Column Configurations -->
+        <div class="config-section">
+          <!-- Column Section Header -->
+          <div class="config-section__header">
+            <span class="config-section__title">
+              <lightning-icon
+                icon-name="utility:column_attribute_type"
+                size="x-small"
+                class="slds-m-right_x-small"
+              ></lightning-icon>
+              Column Configurations
+              <span class="column-count-badge">{columnCount}</span>
+            </span>
+            <div class="col-toolbar">
+              <lightning-input
+                type="search"
+                placeholder="Search columns..."
+                variant="label-hidden"
+                value={_columnSearch}
+                onchange={handleColumnSearch}
+                class="column-search-input"
+              >
+              </lightning-input>
+              <lightning-button
+                label="Add Column"
+                icon-name="utility:add"
+                variant="neutral"
+                size="small"
+                onclick={handleAddColumn}
+              ></lightning-button>
+            </div>
+          </div>
+
+          <!-- Column Table -->
+          <template if:true={columnCount}>
+            <div class="col-table-wrapper">
+              <table class="col-config-table">
+                <thead>
+                  <tr>
+                    <th class="col-th col-th--reorder"></th>
+                    <th class="col-th">Field Label</th>
+                    <th class="col-th">API Name</th>
+                    <th class="col-th col-th--type">Display Type</th>
+                    <th class="col-th col-th--ref">Reference / Filter</th>
+                    <th class="col-th col-th--toggles">Settings</th>
+                    <th class="col-th col-th--agg">Aggregate</th>
+                    <th class="col-th col-th--del"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template
+                    for:each={filteredColumns}
+                    for:item="col"
+                    for:index="index"
+                  >
+                    <tr key={col.tempId} class="col-config-row">
+                      <!-- Reorder -->
+                      <td class="col-td col-td--reorder">
+                        <div class="reorder-btns">
+                          <lightning-button-icon
+                            icon-name="utility:up"
+                            variant="bare"
+                            size="small"
+                            data-index={index}
+                            onclick={moveUp}
+                            disabled={col.isFirst}
+                            title="Move Up"
+                          ></lightning-button-icon>
+                          <lightning-button-icon
+                            icon-name="utility:down"
+                            variant="bare"
+                            size="small"
+                            data-index={index}
+                            onclick={moveDown}
+                            disabled={col.isLast}
+                            title="Move Down"
+                          ></lightning-button-icon>
+                        </div>
+                      </td>
+                      <!-- Field Label -->
+                      <td class="col-td">
+                        <lightning-input
+                          label="Field Label"
+                          variant="label-hidden"
+                          value={col.Name}
+                          onchange={handleColumnFieldChange}
+                          data-index={index}
+                          data-field="Name"
+                          required
+                          placeholder="Label"
+                        >
+                        </lightning-input>
+                      </td>
+                      <!-- API Name -->
+                      <td class="col-td">
+                        <template if:false={col.useCustomPath}>
+                          <lightning-combobox
+                            variant="label-hidden"
+                            value={col._level0Field}
+                            options={objectFieldOptions}
+                            onchange={handleLevelChange}
+                            data-index={index}
+                            data-level="0"
+                            placeholder="Base Field"
+                            required
+                          >
+                          </lightning-combobox>
+
+                          <template if:true={col.level1Options.length}>
+                            <div class="slds-m-top_xx-small">
+                              <lightning-combobox
+                                variant="label-hidden"
+                                value={col._level1Field}
+                                options={col.level1Options}
+                                onchange={handleLevelChange}
+                                data-index={index}
+                                data-level="1"
+                                placeholder="Level 2 Field"
+                              >
+                              </lightning-combobox>
+                            </div>
+                          </template>
+                          <template if:true={col.level2Options.length}>
+                            <div class="slds-m-top_xx-small">
+                              <lightning-combobox
+                                variant="label-hidden"
+                                value={col._level2Field}
+                                options={col.level2Options}
+                                onchange={handleLevelChange}
+                                data-index={index}
+                                data-level="2"
+                                placeholder="Level 3 Field"
+                              >
+                              </lightning-combobox>
+                            </div>
+                          </template>
+                          <template if:true={col.level3Options.length}>
+                            <div class="slds-m-top_xx-small">
+                              <lightning-combobox
+                                variant="label-hidden"
+                                value={col._level3Field}
+                                options={col.level3Options}
+                                onchange={handleLevelChange}
+                                data-index={index}
+                                data-level="3"
+                                placeholder="Level 4 Field"
+                              >
+                              </lightning-combobox>
+                            </div>
+                          </template>
+                        </template>
+
+                        <template if:true={col.useCustomPath}>
+                          <lightning-input
+                            type="text"
+                            variant="label-hidden"
+                            value={col.Column_API_Name__c}
+                            onchange={handleColumnFieldChange}
+                            data-index={index}
+                            data-field="Column_API_Name__c"
+                            placeholder="e.g. Account.Owner.Name"
+                            required
+                          >
+                          </lightning-input>
+                        </template>
+
+                        <div class="slds-m-top_xx-small slds-text-align_right">
+                          <a
+                            href="javascript:void(0);"
+                            onclick={handleToggleCustomPath}
+                            data-index={index}
+                            class="slds-text-body_small"
+                          >
+                            <template if:false={col.useCustomPath}
+                              >Use Custom Path</template
+                            >
+                            <template if:true={col.useCustomPath}
+                              >Use Dropdown</template
+                            >
+                          </a>
+                        </div>
+                      </td>
+                      <!-- Display Type -->
+                      <td class="col-td col-td--type">
+                        <lightning-combobox
+                          variant="label-hidden"
+                          value={col.Data_Type__c}
+                          options={dataTypeOptions}
+                          onchange={handleColumnFieldChange}
+                          data-index={index}
+                          data-field="Data_Type__c"
+                        >
+                        </lightning-combobox>
+                      </td>
+                      <!-- Reference / Filter -->
+                      <td class="col-td col-td--ref">
+                        <template if:true={col.isLookup}>
+                          <lightning-input
+                            label="Target Object"
+                            variant="label-hidden"
+                            value={col.Object_Reference__c}
+                            onchange={handleColumnFieldChange}
+                            data-index={index}
+                            data-field="Object_Reference__c"
+                            placeholder="Target object"
+                            class="slds-m-bottom_xx-small"
+                          >
+                          </lightning-input>
+                        </template>
+
+                        <!-- Preconfigured Default Filter Configuration -->
+                        <template if:true={col.Is_Filterable__c}>
+                          <div class="default-filter-config slds-box slds-box_xx-small slds-m-top_xx-small" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px;">
+                            <div class="slds-text-title_caps slds-m-bottom_xxx-small" style="font-size: 0.65rem; color: #64748b; font-weight: bold;">Default Filter</div>
+                            
+                            <!-- Operator Dropdown -->
+                            <select
+                              class="slds-select slds-m-bottom_xx-small"
+                              value={col._filterOperator}
+                              onchange={handleColumnFieldChange}
+                              data-index={index}
+                              data-field="_filterOperator"
+                              style="font-size: 0.8rem; height: 28px; padding: 2px 8px;"
+                            >
+                              <option value="" selected={col.isFilterOperatorEmpty}>— No Default —</option>
+                              <template for:each={col.operators} for:item="opt">
+                                <option key={opt.value} value={opt.value} selected={opt.isSelected}>
+                                  {opt.label}
+                                </option>
+                              </template>
+                            </select>
+
+                            <!-- Filter Value Inputs -->
+                            <template if:true={col._filterOperator}>
+                              <!-- Case A: Between (Numbers or Dates) -->
+                              <template if:true={col.showBetween}>
+                                <div class="slds-grid slds-gutters_xxx-small">
+                                  <div class="slds-col slds-size_1-of-2">
+                                    <lightning-input
+                                      type={col.inputHtmlType}
+                                      label={col.minLabel}
+                                      variant="label-hidden"
+                                      placeholder={col.minLabel}
+                                      value={col._filterValueMin}
+                                      onchange={handleColumnFieldChange}
+                                      data-index={index}
+                                      data-field="_filterValueMin"
+                                      style="font-size: 0.8rem;"
+                                    >
+                                    </lightning-input>
+                                  </div>
+                                  <div class="slds-col slds-size_1-of-2">
+                                    <lightning-input
+                                      type={col.inputHtmlType}
+                                      label={col.maxLabel}
+                                      variant="label-hidden"
+                                      placeholder={col.maxLabel}
+                                      value={col._filterValueMax}
+                                      onchange={handleColumnFieldChange}
+                                      data-index={index}
+                                      data-field="_filterValueMax"
+                                      style="font-size: 0.8rem;"
+                                    >
+                                    </lightning-input>
+                                  </div>
+                                </div>
+                              </template>
+
+                              <!-- Case B: Multi-select picklist/lookup values (IN/NOT_IN) -->
+                              <template if:true={col.showMulti}>
+                                <template if:true={col.isPicklist}>
+                                  <div style="max-height: 80px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px; background: white;">
+                                    <template for:each={col.picklistOptionsWithSelected} for:item="opt">
+                                      <div key={opt.value} style="display: flex; align-items: center; padding: 1px 4px; font-size: 0.75rem;">
+                                        <input
+                                          type="checkbox"
+                                          checked={opt.isSelected}
+                                          data-index={index}
+                                          data-value={opt.value}
+                                          onchange={handlePicklistFilterCheck}
+                                          style="margin-right: 4px; transform: scale(0.9);"
+                                        />
+                                        <span class="slds-truncate" title={opt.label}>{opt.label}</span>
+                                      </div>
+                                    </template>
+                                  </div>
+                                </template>
+                                <template if:false={col.isPicklist}>
+                                  <!-- If Lookup field, show searchable pills UI -->
+                                  <template if:true={col.isLookup}>
+                                    <div class="lookup-filter-container">
+                                      <!-- Selected Pills -->
+                                      <template if:true={col._selectedPills.length}>
+                                        <div class="lookup-pills-container">
+                                          <template for:each={col._selectedPills} for:item="pill">
+                                            <span key={pill.value} class="slds-pill" style="height: 22px; padding: 0px 4px; font-size: 0.75rem;">
+                                              <span class="slds-pill__label" title={pill.label}>{pill.label}</span>
+                                              <button
+                                                class="slds-button slds-button_icon slds-pill__remove"
+                                                title="Remove"
+                                                data-index={index}
+                                                data-value={pill.value}
+                                                onclick={handleRemoveLookupPill}
+                                                style="width: 14px; height: 14px; line-height: 1;"
+                                              >
+                                                <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                              </button>
+                                            </span>
+                                          </template>
+                                        </div>
+                                      </template>
+                                      <!-- Search Input -->
+                                      <div class="lookup-input-wrap">
+                                        <lightning-input
+                                          type="search"
+                                          label="Search Record"
+                                          variant="label-hidden"
+                                          value={col.lookupSearchTerm}
+                                          placeholder="Search records..."
+                                          onchange={handleLookupSearchChange}
+                                          data-index={index}
+                                          autocomplete="off"
+                                          style="font-size: 0.8rem;"
+                                        >
+                                        </lightning-input>
+                                        <!-- Autocomplete Dropdown List -->
+                                        <template if:true={col.showLookupDropdown}>
+                                          <div class="lookup-dropdown">
+                                            <ul class="lookup-dropdown-list">
+                                              <template for:each={col.lookupResults} for:item="res">
+                                                <li
+                                                  key={res.recordId}
+                                                  data-index={index}
+                                                  data-value={res.recordId}
+                                                  data-label={res.displayName}
+                                                  onclick={handleSelectLookupResult}
+                                                  class="lookup-dropdown-item"
+                                                >
+                                                  {res.displayName}
+                                                </li>
+                                              </template>
+                                            </ul>
+                                          </div>
+                                        </template>
+                                      </div>
+                                    </div>
+                                  </template>
+                                  <!-- If generic text/other field -->
+                                  <template if:false={col.isLookup}>
+                                    <lightning-input
+                                      type="text"
+                                      label="Comma-separated values"
+                                      variant="label-hidden"
+                                      placeholder="Value1, Value2..."
+                                      value={col._filterValue}
+                                      onchange={handleColumnFieldChange}
+                                      data-index={index}
+                                      data-field="_filterValue"
+                                      style="font-size: 0.8rem;"
+                                    >
+                                    </lightning-input>
+                                  </template>
+                                </template>
+                              </template>
+
+                              <!-- Case C: Boolean toggle (No value input needed) -->
+
+                              <!-- Case D: Single value input -->
+                              <template if:true={col.showSingle}>
+                                <template if:true={col.isPicklist}>
+                                  <select
+                                    class="slds-select"
+                                    value={col._filterValue}
+                                    onchange={handleColumnFieldChange}
+                                    data-index={index}
+                                    data-field="_filterValue"
+                                    style="font-size: 0.8rem; height: 26px; padding: 2px;"
+                                  >
+                                    <option value="">— Select Value —</option>
+                                    <template for:each={col.picklistOptions} for:item="opt">
+                                      <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                      </option>
+                                    </template>
+                                  </select>
+                                </template>
+                                <template if:false={col.isPicklist}>
+                                  <!-- If Lookup field, show searchable UI for single value -->
+                                  <template if:true={col.isLookup}>
+                                    <div class="lookup-filter-container">
+                                      <!-- Selected Pill -->
+                                      <template if:true={col._selectedPill}>
+                                        <div class="lookup-pills-container">
+                                          <span class="slds-pill" style="height: 22px; padding: 0px 4px; font-size: 0.75rem;">
+                                            <span class="slds-pill__label" title={col._selectedPill.label}>{col._selectedPill.label}</span>
+                                            <button
+                                              class="slds-button slds-button_icon slds-pill__remove"
+                                              title="Remove"
+                                              data-index={index}
+                                              data-value={col._selectedPill.value}
+                                              onclick={handleRemoveLookupPill}
+                                              style="width: 14px; height: 14px; line-height: 1;"
+                                            >
+                                              <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                            </button>
+                                          </span>
+                                        </div>
+                                      </template>
+                                      <!-- Search Input -->
+                                      <template if:false={col._selectedPill}>
+                                        <div class="lookup-input-wrap">
+                                          <lightning-input
+                                            type="search"
+                                            label="Search Record"
+                                            variant="label-hidden"
+                                            value={col.lookupSearchTerm}
+                                            placeholder="Search record..."
+                                            onchange={handleLookupSearchChange}
+                                            data-index={index}
+                                            autocomplete="off"
+                                            style="font-size: 0.8rem;"
+                                          >
+                                          </lightning-input>
+                                          <!-- Autocomplete Dropdown List -->
+                                          <template if:true={col.showLookupDropdown}>
+                                            <div class="lookup-dropdown">
+                                              <ul class="lookup-dropdown-list">
+                                                <template for:each={col.lookupResults} for:item="res">
+                                                  <li
+                                                    key={res.recordId}
+                                                    data-index={index}
+                                                    data-value={res.recordId}
+                                                    data-label={res.displayName}
+                                                    onclick={handleSelectLookupResult}
+                                                    class="lookup-dropdown-item"
+                                                  >
+                                                    {res.displayName}
+                                                  </li>
+                                                </template>
+                                              </ul>
+                                            </div>
+                                          </template>
+                                        </div>
+                                      </template>
+                                    </div>
+                                  </template>
+                                  <!-- If generic text/number/date field -->
+                                  <template if:false={col.isLookup}>
+                                    <lightning-input
+                                      type={col.inputHtmlType}
+                                      label="Filter Value"
+                                      variant="label-hidden"
+                                      placeholder="Enter value..."
+                                      value={col._filterValue}
+                                      onchange={handleColumnFieldChange}
+                                      data-index={index}
+                                      data-field="_filterValue"
+                                      style="font-size: 0.8rem;"
+                                    >
+                                    </lightning-input>
+                                  </template>
+                                </template>
+                              </template>
+                            </template>
+                          </div>
+                        </template>
+                      </td>
+                      <!-- Toggles as chips -->
+                      <td class="col-td col-td--toggles">
+                        <div class="chip-row">
+                          <span
+                            class={col.chipVisible}
+                            data-index={index}
+                            data-field="Is_Visible__c"
+                            onclick={handleChipToggle}
+                            title="Visible"
+                            >Vis</span
+                          >
+                          <span
+                            class={col.chipSortable}
+                            data-index={index}
+                            data-field="Is_Sortable__c"
+                            onclick={handleChipToggle}
+                            title="Sortable"
+                            >Sort</span
+                          >
+                          <span
+                            class={col.chipEditable}
+                            data-index={index}
+                            data-field="Is_Editable__c"
+                            onclick={handleChipToggle}
+                            title="Editable"
+                            >Edit</span
+                          >
+                          <span
+                            class={col.chipGroupable}
+                            data-index={index}
+                            data-field="Is_Groupable__c"
+                            onclick={handleChipToggle}
+                            title="Groupable"
+                            >Grp</span
+                          >
+                          <span
+                            class={col.chipFilterable}
+                            data-index={index}
+                            data-field="Is_Filterable__c"
+                            onclick={handleChipToggle}
+                            title="Filterable"
+                            >Filt</span
+                          >
+                          <span
+                            class={col.chipSearchable}
+                            data-index={index}
+                            data-field="Is_Searchable__c"
+                            onclick={handleChipToggle}
+                            title="Searchable"
+                            >Srch</span
+                          >
+                          <span
+                            class={col.chipAdditional}
+                            data-index={index}
+                            data-field="Additional_Column__c"
+                            onclick={handleChipToggle}
+                            title="Additional column (queried but not displayed)"
+                            >Xtra</span
+                          >
+                        </div>
+                      </td>
+                      <!-- Aggregate -->
+                      <td class="col-td col-td--agg">
+                        <lightning-combobox
+                          variant="label-hidden"
+                          value={col.Aggregate__c}
+                          options={aggregateOptions}
+                          onchange={handleColumnFieldChange}
+                          data-index={index}
+                          data-field="Aggregate__c"
+                        >
+                        </lightning-combobox>
+                      </td>
+                      <!-- Delete -->
+                      <td class="col-td col-td--del">
+                        <lightning-button-icon
+                          icon-name="utility:delete"
+                          variant="bare"
+                          size="small"
+                          class="icon-danger"
+                          data-index={index}
+                          onclick={handleRemoveColumn}
+                          title="Remove Column"
+                        >
+                        </lightning-button-icon>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </template>
+
+          <!-- Empty state -->
+          <template if:false={columnCount}>
+            <div class="empty-columns-state">
+              <lightning-icon
+                icon-name="utility:table"
+                size="small"
+                class="slds-m-bottom_small"
+              ></lightning-icon>
+              <p>No columns yet. Click <strong>Add Column</strong> to begin.</p>
+            </div>
+          </template>
+
+          <!-- Add row CTA -->
+          <template if:true={columnCount}>
+            <div class="add-col-row" onclick={handleAddColumn}>
+              <lightning-icon
+                icon-name="utility:add"
+                size="x-small"
+              ></lightning-icon>
+              Add Column
+            </div>
+          </template>
+        </div>
+
+        <!-- SECTION 4: Action Configurations -->
+        <div class="config-section slds-m-top_medium">
+          <div class="config-section__header">
+            <span class="config-section__title">
+              <lightning-icon
+                icon-name="utility:macros"
+                size="x-small"
+                class="slds-m-right_x-small"
+              ></lightning-icon>
+              Action Configurations
+              <span class="column-count-badge">{actionCount}</span>
+            </span>
+            <div class="col-toolbar">
+              <lightning-button
+                label="Add Action"
+                icon-name="utility:add"
+                variant="neutral"
+                size="small"
+                onclick={handleAddAction}
+              ></lightning-button>
+            </div>
+          </div>
+
+          <!-- Guide for Action Configurations -->
+          <div
+            class="slds-m-horizontal_small slds-m-top_small slds-box slds-box_x-small slds-theme_default slds-is-relative"
+            style="background: #f4f6f9; border-color: #c9cdd4"
+          >
+            <lightning-accordion
+              active-section-name=""
+              allow-multiple-sections-open
+            >
+              <lightning-accordion-section
+                name="guide"
+                label="How to configure Target for Actions? (Admin Guide)"
+              >
+                <ul
+                  class="slds-list_dotted slds-p-left_small slds-text-body_small"
+                >
+                  <li class="slds-m-bottom_x-small">
+                    <strong>Flow:</strong> Enter the exact API Name of the Flow
+                    (e.g., <code>Assign_Owner_Flow</code>). Make sure the flow
+                    has a <code>recordIds</code> text collection variable
+                    available for input.
+                  </li>
+                  <li class="slds-m-bottom_x-small">
+                    <strong>Apex:</strong> Enter the exact Apex Class Name
+                    (e.g., <code>MassEmailActionHandler</code>).
+                    <b>Note:</b> The Apex class must implement the
+                    <code>DynamicTableActionHandler</code> interface.
+                  </li>
+                  <li class="slds-m-bottom_x-small">
+                    <strong>Navigation:</strong> Enter the API Name of the
+                    standard page or Lightning Component Tab (e.g.,
+                    <code>Standard_Account_Tab</code>).
+                  </li>
+                  <li class="slds-m-bottom_x-small">
+                    <strong>LWC:</strong> Enter the Component Name with
+                    namespace (e.g., <code>c:myCustomLwc</code>).
+                  </li>
+                  <li class="slds-m-bottom_x-small">
+                    <strong>VF Page:</strong> Enter the exact Visualforce Page
+                    Name (e.g., <code>GenerateInvoicePDF</code>).
+                  </li>
+                </ul>
+              </lightning-accordion-section>
+            </lightning-accordion>
+          </div>
+
+          <template if:true={actionCount}>
+            <div class="col-table-wrapper">
+              <table class="col-config-table">
+                <thead>
+                  <tr>
+                    <th class="col-th col-th--reorder"></th>
+                    <th class="col-th">Action Label</th>
+                    <th class="col-th">Icon</th>
+                    <th class="col-th">Action Type</th>
+                    <th class="col-th">Target (API/Class)</th>
+                    <th class="col-th" style="width: 100px">Req Select</th>
+                    <th class="col-th col-th--del"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template for:each={actions} for:item="act" for:index="index">
+                    <tr key={act.tempId} class="col-config-row">
+                      <td class="col-td col-td--reorder">
+                        <div class="reorder-btns">
+                          <lightning-button-icon
+                            icon-name="utility:up"
+                            variant="bare"
+                            size="small"
+                            data-index={index}
+                            onclick={moveActionUp}
+                            disabled={act.isFirst}
+                            title="Move Up"
+                          ></lightning-button-icon>
+                          <lightning-button-icon
+                            icon-name="utility:down"
+                            variant="bare"
+                            size="small"
+                            data-index={index}
+                            onclick={moveActionDown}
+                            disabled={act.isLast}
+                            title="Move Down"
+                          ></lightning-button-icon>
+                        </div>
+                      </td>
+                      <td class="col-td">
+                        <lightning-input
+                          label="Label"
+                          variant="label-hidden"
+                          value={act.Label__c}
+                          onchange={handleActionFieldChange}
+                          data-index={index}
+                          data-field="Label__c"
+                          required
+                          placeholder="Label"
+                        ></lightning-input>
+                      </td>
+                      <td class="col-td">
+                        <lightning-input
+                          label="Icon"
+                          variant="label-hidden"
+                          value={act.Icon__c}
+                          onchange={handleActionFieldChange}
+                          data-index={index}
+                          data-field="Icon__c"
+                          placeholder="e.g. utility:add"
+                        ></lightning-input>
+                      </td>
+                      <td class="col-td">
+                        <select
+                          class="slds-select"
+                          value={act.Action_Type__c}
+                          onchange={handleActionFieldChange}
+                          data-index={index}
+                          data-field="Action_Type__c"
+                          required
+                        >
+                          <template for:each={actionTypeOptions} for:item="opt">
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          </template>
+                        </select>
+                      </td>
+                      <td class="col-td">
+                        <lightning-input
+                          label="Target"
+                          variant="label-hidden"
+                          value={act.Target__c}
+                          onchange={handleActionFieldChange}
+                          data-index={index}
+                          data-field="Target__c"
+                          required
+                          placeholder="Target API Name"
+                        ></lightning-input>
+                      </td>
+                      <td class="col-td" style="text-align: center">
+                        <lightning-input
+                          type="checkbox"
+                          label="Requires Selection"
+                          variant="label-hidden"
+                          checked={act.Requires_Selection__c}
+                          onchange={handleActionFieldChange}
+                          data-index={index}
+                          data-field="Requires_Selection__c"
+                        ></lightning-input>
+                      </td>
+                      <td class="col-td col-td--del">
+                        <lightning-button-icon
+                          icon-name="utility:delete"
+                          variant="bare"
+                          size="small"
+                          class="icon-danger"
+                          data-index={index}
+                          onclick={handleRemoveAction}
+                          title="Remove Action"
+                        ></lightning-button-icon>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </template>
+          <template if:false={actionCount}>
+            <div class="empty-columns-state">
+              <lightning-icon
+                icon-name="utility:macros"
+                size="small"
+                class="slds-m-bottom_small"
+              ></lightning-icon>
+              <p>No actions yet. Click <strong>Add Action</strong> to begin.</p>
+            </div>
+          </template>
+          <template if:true={actionCount}>
+            <div class="add-col-row" onclick={handleAddAction}>
+              <lightning-icon
+                icon-name="utility:add"
+                size="x-small"
+              ></lightning-icon>
+              Add Action
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>

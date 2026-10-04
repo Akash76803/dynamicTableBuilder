@@ -1,0 +1,344 @@
+/* ── simpleDataTable.css ────────────────────────────────────────────────── */
+
+.sdt-container {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #111827;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Toolbar */
+.sdt-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sdt-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.sdt-count {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.toolbar-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.sdt-search-input {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+    width: 200px;
+}
+.sdt-search-input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+}
+
+.sdt-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.sdt-btn:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.sdt-btn.active {
+    background: #f5f3ff;
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
+.sdt-btn-icon {
+    padding: 6px 10px;
+}
+
+.sdt-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.sdt-badge {
+    background: #6366f1;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+/* Active Filters */
+.sdt-active-filters {
+    padding: 12px 20px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.sdt-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    color: #4b5563;
+}
+
+.sdt-chip-remove {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 2px;
+}
+.sdt-chip-remove:hover { color: #ef4444; }
+
+.sdt-clear-all {
+    background: none;
+    border: none;
+    color: #6366f1;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+.sdt-clear-all:hover { text-decoration: underline; }
+
+/* Main Area */
+.sdt-main-area {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+.sdt-data-wrapper {
+    flex: 1;
+    overflow: auto;
+    background: #f9fafb;
+    position: relative;
+}
+
+/* Side Panels */
+.sdt-side-panel {
+    width: 320px;
+    border-left: 1px solid #e5e7eb;
+    background: #fff;
+    flex-shrink: 0;
+    box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+    z-index: 10;
+}
+
+/* Table View */
+.sdt-table-container {
+    margin: 16px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05), 0 2px 6px -2px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.sdt-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.sdt-table th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 12px;
+    text-align: left;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    z-index: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sdt-table td {
+    padding: 14px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    transition: background 0.15s;
+}
+
+.sdt-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sdt-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.sdt-aggregate-row {
+    background: #f8fafc;
+    border-top: 2px solid #e2e8f0;
+    font-weight: 600;
+}
+
+.sdt-aggregate-row td {
+    color: #0f172a;
+}
+
+.sdt-aggregate-label {
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: #64748b;
+}
+
+/* Card View */
+.sdt-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 20px;
+}
+
+.sdt-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.sdt-card:hover {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+}
+
+.sdt-card-field {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+.sdt-card-field:last-child {
+    margin-bottom: 0;
+}
+
+.sdt-card-label {
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.sdt-card-value {
+    font-size: 14px;
+    color: #111827;
+}
+
+/* Pagination */
+.sdt-pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 12px 24px;
+    gap: 16px;
+    background: #fff;
+    margin-top: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.sdt-page-info {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* States */
+.sdt-loading, .sdt-error, .sdt-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #6b7280;
+}
+
+.sdt-error { color: #ef4444; }
+
+.sdt-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: sdt-spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes sdt-spin {
+    to { transform: rotate(360deg); }
+}
+
+.sdt-sort-th {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.sdt-sort-th:hover {
+    color: #4f46e5;
+}
+.sdt-sort-icon {
+    font-size: 10px;
+}

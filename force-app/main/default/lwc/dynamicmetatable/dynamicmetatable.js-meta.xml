@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+
+    <apiVersion>59.0</apiVersion>
+
+    <!-- true = admin can drag this to App Builder -->
+    <!-- This is the ONLY exposed component        -->
+    <!-- paginationBar and searchFilter are hidden  -->
+    <isExposed>true</isExposed>
+
+   <targets>
+	<target>lightning__RecordPage</target>
+	<target>lightning__AppPage</target>
+	<target>lightning__HomePage</target>
+	<!--<target>lightning__Tab</target>-->
+	<!--<target>lightning__Inbox</target>-->
+	<!--<target>lightning__UtilityBar</target>-->
+	<target>lightning__FlowScreen</target>
+	<!--<target>lightningSnapin__ChatMessage</target>-->
+	<!--<target>lightningSnapin__Minimized</target>-->
+	<!--<target>lightningSnapin__PreChat</target>-->
+	<target>lightningSnapin__ChatHeader</target>
+	<target>lightningCommunity__Page</target>
+	<target>lightningCommunity__Default</target>
+	<target>lightningCommunity__Page_Layout</target>
+	<target>lightningCommunity__Theme_Layout</target>
+	<!--<target>lightningStatic__Email</target>-->
+	<!--<target>lightning_VoiceExtension</target>-->
+	<!--<target>analytics__Dashboard</target>-->
+	<!--<target>lightning__RecordAction</target>-->
+	<!--<target>lightning__GlobalAction</target>-->
+	<!--<target>lightning__AgentforceInput</target>-->
+	<!--<target>lightning__AgentforceOutput</target>-->
+   </targets>
+    <targetConfigs>
+        <targetConfig
+      targets="lightning__AppPage,
+                     lightning__RecordPage,
+                     lightning__HomePage,
+                     lightningCommunity__Default"
+    >
+
+            <!-- MAIN CONFIG — admin types this -->
+            <!-- Must match TableName__c in     -->
+            <!-- DataTableConfig__mdt exactly   -->
+            <property
+        name="tableName"
+        type="String"
+        label="Table Configuration Name"
+        description="Must match TableName in Data Table Config metadata. Example: Account_List"
+      >
+            </property>
+
+            <property
+        name="showCheckboxColumn"
+        type="Boolean"
+        label="Show Row Selection Checkboxes"
+        description="Display a checkbox column for selecting rows. Selections persist across pages."
+        default="true"
+      >
+            </property>
+
+            <property
+                name="hideFilterChips"
+                type="Boolean"
+                label="Hide Active Filters Bar"
+                description="Hides the bar displaying active filters."
+                default="false"
+            />
+
+            <property
+                name="hideGrandTotal"
+                type="Boolean"
+                label="Hide Grand Total Row"
+                description="Hides the Grand Total summary row at the bottom of the table."
+                default="false"
+            />
+
+            <property
+                name="logoIcon"
+                type="String"
+                label="Header Logo Icon"
+                description="Salesforce Lightning Icon name next to table title (e.g. standard:opportunity, utility:table)."
+                default="standard:opportunity"
+            />
+
+            <property
+                name="logoUrl"
+                type="String"
+                label="Header Logo URL"
+                description="Custom Image URL or Static Resource path next to table title."
+                default=""
+            />
+
+            <property
+        name="filtersFeature"
+        type="String"
+        label="Filters Feature"
+        description="Page-level override for the Filters button. Default follows table configuration."
+        datasource="Default,Enabled,Disabled"
+        default="Default"
+      >
+            </property>
+
+            <property
+        name="matrixViewFeature"
+        type="String"
+        label="Matrix View Feature"
+        description="Page-level override for Matrix View. Default follows table configuration."
+        datasource="Default,Enabled,Disabled"
+        default="Default"
+      >
+            </property>
+
+            <property
+        name="columnManagerFeature"
+        type="String"
+        label="Column Manager Feature"
+        description="Page-level override for Column Manager. Default follows table configuration."
+        datasource="Default,Enabled,Disabled"
+        default="Default"
+      >
+            </property>
+
+            <property
+        name="viewsFeature"
+        type="String"
+        label="Views Feature"
+        description="Page-level override for saved Views. Default follows table configuration."
+        datasource="Default,Enabled,Disabled"
+        default="Default"
+      >
+            </property>
+
+            <property
+        name="importFeature"
+        type="String"
+        label="Import Feature"
+        description="Page-level override for Import. Default follows table configuration."
+        datasource="Default,Enabled,Disabled"
+        default="Default"
+      >
+            </property>
+
+            <property
+        name="exportFeature"
+        type="String"
+        label="Export Feature"
+        description="Page-level override for Export. Default follows table configuration."
+        datasource="Default,Enabled,Disabled"
+        default="Default"
+      >
+            </property>
+
+            <property
+        name="newRecordFeature"
+        type="String"
+        label="New Record Feature"
+        description="Page-level override for New Record. Default follows table configuration."
+        datasource="Default,Enabled,Disabled"
+        default="Default"
+      >
+            </property>
+
+            <property
+        name="rowActionsFeature"
+        type="String"
+        label="Row Actions Feature"
+        description="Page-level override for row actions. Default follows table configuration."
+        datasource="Default,Visible,Hidden"
+        default="Default"
+      >
+            </property>
+
+        </targetConfig>
+        <targetConfig targets="lightning__FlowScreen">
+            <property
+                name="tableName"
+                type="String"
+                label="Table Configuration Name"
+                description="Must match TableName in Data Table Config metadata. Example: Account_List"
+                required="true"
+            />
+            <property
+                name="recordId"
+                type="String"
+                label="Parent Record ID"
+                description="Pass context recordId if the table shows related lists."
+            />
+            <property
+                name="showCheckboxColumn"
+                type="Boolean"
+                label="Show Row Selection Checkboxes"
+                description="Display a checkbox column for selecting rows."
+                default="true"
+            />
+            <property
+                name="hideFilterChips"
+                type="Boolean"
+                label="Hide Active Filters Bar"
+                description="Hides the bar displaying active filters."
+                default="false"
+            />
+            <property
+                name="hideGrandTotal"
+                type="Boolean"
+                label="Hide Grand Total Row"
+                description="Hides the Grand Total summary row at the bottom of the table."
+                default="false"
+            />
+            <property
+                name="isFlowMode"
+                type="Boolean"
+                label="Is Flow Mode"
+                description="Hides action handlers and manages selections for Flow Screens."
+                default="true"
+            />
+            <property
+                name="filtersFeature"
+                type="String"
+                label="Filters Feature"
+                description="Page-level override for the Filters button. Default follows table configuration."
+                default="Default"
+            />
+            <property
+                name="matrixViewFeature"
+                type="String"
+                label="Matrix View Feature"
+                description="Page-level override for Matrix View. Default follows table configuration."
+                default="Default"
+            />
+            <property
+                name="columnManagerFeature"
+                type="String"
+                label="Column Manager Feature"
+                description="Page-level override for Column Manager. Default follows table configuration."
+                default="Default"
+            />
+            <property
+                name="viewsFeature"
+                type="String"
+                label="Views Feature"
+                description="Page-level override for saved Views. Default follows table configuration."
+                default="Default"
+            />
+            <property
+                name="importFeature"
+                type="String"
+                label="Import Feature"
+                description="Page-level override for Import. Default follows table configuration."
+                default="Default"
+            />
+            <property
+                name="exportFeature"
+                type="String"
+                label="Export Feature"
+                description="Page-level override for Export. Default follows table configuration."
+                default="Default"
+            />
+            <property
+                name="newRecordFeature"
+                type="String"
+                label="New Record Feature"
+                description="Page-level override for New Record. Default follows table configuration."
+                default="Default"
+            />
+            <property
+                name="rowActionsFeature"
+                type="String"
+                label="Row Actions Feature"
+                description="Page-level override for row actions. Default follows table configuration."
+                default="Default"
+            />
+            <property
+                name="logoIcon"
+                type="String"
+                label="Header Logo Icon"
+                description="Salesforce Lightning Icon name next to table title (e.g. standard:opportunity, utility:table)."
+                default="standard:opportunity"
+            />
+            <property
+                name="logoUrl"
+                type="String"
+                label="Header Logo URL"
+                description="Custom Image URL or Static Resource path next to table title."
+                default=""
+            />
+            <property
+                name="selectedRowIds"
+                type="String[]"
+                role="outputOnly"
+                label="Selected Row IDs"
+                description="List of IDs of selected rows."
+            />
+        </targetConfig>
+    </targetConfigs>
+
+
+</LightningComponentBundle>
