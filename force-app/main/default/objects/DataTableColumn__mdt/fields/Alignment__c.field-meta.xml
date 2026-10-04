@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Alignment__c</fullName>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Alignment</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>left</fullName>
+                <default>true</default>
+                <label>left</label>
+            </value>
+            <value>
+                <fullName>center</fullName>
+                <default>false</default>
+                <label>center</label>
+            </value>
+            <value>
+                <fullName>right</fullName>
+                <default>false</default>
+                <label>right</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

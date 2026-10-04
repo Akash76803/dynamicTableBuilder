@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Enable_Filters__c</fullName>
+    <defaultValue>true</defaultValue>
+    <deprecated>false</deprecated>
+    <description>If checked, the filter panel and filter toggle button will be visible.</description>
+    <label>Enable Filters</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Connected_Org__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>The org associated with this metadata snapshot.</description>
+    <label>Connected Org</label>
+    <referenceTo>Connected_Org__c</referenceTo>
+    <relationshipLabel>Metadata Snapshots</relationshipLabel>
+    <relationshipName>Metadata_Snapshots</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

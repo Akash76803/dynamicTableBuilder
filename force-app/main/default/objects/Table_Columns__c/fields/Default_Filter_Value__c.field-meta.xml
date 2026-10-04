@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Default_Filter_Value__c</fullName>
+    <deprecated>false</deprecated>
+    <description>Filter_Type__c | Format |                                                    Example
+text                   string                                                           Acme
+exact                 string                                                           Closed Won
+starts_with         string                                                          John   
+range                JSON with min/max                                   {&quot;min&quot;:1000,&quot;max&quot;:50000} 
+date_range       JSON with from/to ISO dates                    {&quot;from&quot;:&quot;2025-01-01&quot;,&quot;to&quot;:&quot;2025-12-31&quot;}
+multi_select      JSON array of values                                 [&quot;Prospecting&quot;,&quot;Qualification&quot;]
+boolean                                                                                true or false
+none                                                                                      Leave blank</description>
+    <externalId>false</externalId>
+    <label>Default Filter Value</label>
+    <length>255</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

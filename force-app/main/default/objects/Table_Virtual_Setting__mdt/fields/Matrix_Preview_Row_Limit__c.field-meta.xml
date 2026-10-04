@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Matrix_Preview_Row_Limit__c</fullName>
+    <deprecated>false</deprecated>
+    <description>Maximum number of grouped Matrix rows rendered interactively in the browser. Matrix exports continue to use the full filtered data set.</description>
+    <externalId>false</externalId>
+    <fieldManageability>DeveloperControlled</fieldManageability>
+    <label>Matrix Preview Row Limit</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

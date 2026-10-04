@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Twilio_Message_Id__c</fullName>
+    <description>Twilio&apos;s unique message SID (e.g. SM3b…). Use this to look up messages in Twilio Console.</description>
+    <externalId>false</externalId>
+    <label>Twilio Message ID</label>
+    <length>50</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

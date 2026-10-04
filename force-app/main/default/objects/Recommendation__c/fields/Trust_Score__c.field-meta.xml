@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Trust_Score__c</fullName>
+    <description>AI Confidence percentage for this recommendation.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Confidence score (0-100%) assigned by the AI engine.</inlineHelpText>
+    <label>Trust Score (%)</label>
+    <precision>3</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

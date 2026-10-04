@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>BulkScanJob__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Bulk Scan Job</label>
+    <referenceTo>AdminTool_BulkFieldScanJob__c</referenceTo>
+    <relationshipLabel>Field Scan Jobs</relationshipLabel>
+    <relationshipName>FieldScanJobs</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>
