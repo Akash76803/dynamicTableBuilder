@@ -1,7 +1,5 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import getTableData from '@salesforce/apex/SimpleTableController.getTableData';
-import { applyFilters } from 'c/tableFilterEngine';
-
 export default class SimpleDataTable extends LightningElement {
     
     @api tableName;
