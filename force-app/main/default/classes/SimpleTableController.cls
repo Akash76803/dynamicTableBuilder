@@ -15,7 +15,7 @@ public with sharing class SimpleTableController {
      *
      * Used as @wire in simpleDataTable.js (cacheable=true).
      *
-     * @param tableName  Name field on Table__c — which config to load
+     * @param tableName  Name field on Shree_Tech__Table__c — which config to load
      * @param parentId   Optional — record page context; filters child records.
      *                   Pass null when used on an App/Home page.
      */

@@ -13,18 +13,18 @@ public class SimpleTableDTO {
 
     /**
      * Represents a single column in the table.
-     * Built from Table_Columns__c config records.
+     * Built from Shree_Tech__Table_Columns__c config records.
      */
     public class ColumnDef {
-        @AuraEnabled public String  key;          // Unique key = Column_API_Name__c (col0, col1...)
-        @AuraEnabled public String  label;        // Display label (Name field on Table_Columns__c)
-        @AuraEnabled public String  fieldName;    // Salesforce field API name (Column_API_Name__c)
+        @AuraEnabled public String  key;          // Unique key = Shree_Tech__Column_API_Name__c (col0, col1...)
+        @AuraEnabled public String  label;        // Display label (Name field on Shree_Tech__Table_Columns__c)
+        @AuraEnabled public String  fieldName;    // Salesforce field API name (Shree_Tech__Column_API_Name__c)
         @AuraEnabled public String  soqlFieldPath;// Dot-notation SOQL path (e.g. Account.Name)
         @AuraEnabled public String  dataType;     // Text|Number|Currency|Percent|Date|DateTime|Picklist|Boolean|Lookup
         @AuraEnabled public Boolean sortable;
         @AuraEnabled public Boolean filterable;
         @AuraEnabled public Boolean searchable;
-        @AuraEnabled public Integer sortOrder;    // From Index__c on Table_Columns__c
+        @AuraEnabled public Integer sortOrder;    // From Shree_Tech__Index__c on Shree_Tech__Table_Columns__c
         @AuraEnabled public String  aggregate;    // Sum, Average, Count, etc.
         // Type-flag booleans — pre-computed for easy template rendering in LWC
         @AuraEnabled public Boolean isText;
@@ -76,6 +76,6 @@ public class SimpleTableDTO {
         @AuraEnabled public List<ColumnDef> columns;       // Ordered column definitions
         @AuraEnabled public List<RowData>   rows;          // All fetched rows
         @AuraEnabled public String          objectApiName; // e.g. 'Account'
-        @AuraEnabled public String          tableName;     // Config name (Name on Table__c)
+        @AuraEnabled public String          tableName;     // Config name (Name on Shree_Tech__Table__c)
     }
 }

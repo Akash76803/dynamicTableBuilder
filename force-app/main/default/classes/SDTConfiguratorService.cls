@@ -81,7 +81,7 @@ public with sharing class SDTConfiguratorService {
    * Builds column configs, executes the dynamic SOQL (filtered by parentId
    * when provided), and returns a fully flattened TableResult DTO.
    *
-   * @param tableName   Name field on Table__c G�� identifies which config to use
+   * @param tableName   Name field on Shree_Tech__Table__c G�� identifies which config to use
    * @param parentId    Optional G�� when on a record page, filters child records
    *                    by this Id using the lookup field defined on the column config
    */
@@ -151,7 +151,7 @@ public with sharing class SDTConfiguratorService {
     return results;
   }
 
-  // G��G�� Private: build one ColumnConfig DTO from a Table_Columns__c record G��G��G��
+  // G��G�� Private: build one ColumnConfig DTO from a Shree_Tech__Table_Columns__c record G��G��G��
 
   
 
@@ -343,7 +343,7 @@ public with sharing class SDTConfiguratorService {
   /**
    * Receives a JSON array of SaveRequest from LWC.
    * Maps each request back to the real SObject + field names using
-   * Table_Columns__c config (col.key G�� fieldName + lookupField).
+   * Shree_Tech__Table_Columns__c config (col.key G�� fieldName + lookupField).
    * Performs partial DML and returns a SaveResult.
    *
    * @param tableName   Same tableName used to load G�� needed to resolve col keys G�� fieldNames
@@ -464,24 +464,24 @@ public with sharing class SDTConfiguratorService {
   public static SDTConfiguratorDTO.ImportMetadata getImportMetadata(
     String tableName
   ) {
-    Table__c table = SDTConfiguratorSelector.getTableByName(tableName);
+    Shree_Tech__Table__c table = SDTConfiguratorSelector.getTableByName(tableName);
     if (table == null)
       throw new DynamicTableException(
         'Table configuration "' + tableName + '" not found.'
       );
 
     SDTConfiguratorDTO.ImportMetadata result = new SDTConfiguratorDTO.ImportMetadata();
-    result.objectApiName = table.Object_API_Name__c;
+    result.objectApiName = table.Shree_Tech__Object_API_Name__c;
     result.allFields = new List<SDTConfiguratorDTO.ImportFieldInfo>();
 
-    Schema.SObjectType sObjectType = getSObjectType(table.Object_API_Name__c);
+    Schema.SObjectType sObjectType = getSObjectType(table.Shree_Tech__Object_API_Name__c);
     if (sObjectType == null)
       throw new DynamicTableException(
         'Object "' + result.objectApiName + '" not found in schema.'
       );
 
     Map<String, Schema.SObjectField> fieldsMap = getFieldMap(
-      table.Object_API_Name__c
+      table.Shree_Tech__Object_API_Name__c
     );
 
     for (Schema.SObjectField field : fieldsMap.values()) {
@@ -545,9 +545,9 @@ public with sharing class SDTConfiguratorService {
    * Upserts the table, upserts the provided columns, and deletes the rest.
    */
   public static void saveMetadata(
-    Table__c table,
-    List<Table_Columns__c> columns,
-    List<Table_Action__c> actions,
+    Shree_Tech__Table__c table,
+    List<Shree_Tech__Table_Columns__c> columns,
+    List<Shree_Tech__Table_Action__c> actions,
     List<String> deletedColumnIds,
     List<String> deletedActionIds
   ) {
@@ -564,19 +564,19 @@ public with sharing class SDTConfiguratorService {
 
           // 2. Prepare Columns
           if (columns != null) {
-            for (Table_Columns__c col : columns) {
+            for (Shree_Tech__Table_Columns__c col : columns) {
               if (col == null) continue;
               if (col.Id == null) {
-                col.Table_Name__c = table.Id;
+                col.Shree_Tech__Table_Name__c = table.Id;
               }
-              // Ensure Data_Type__c is set (dropdown in LWC)
-              if (String.isBlank(col.Data_Type__c)) {
-                col.Data_Type__c = 'Text'; // safe fallback
+              // Ensure Shree_Tech__Data_Type__c is set (dropdown in LWC)
+              if (String.isBlank(col.Shree_Tech__Data_Type__c)) {
+                col.Shree_Tech__Data_Type__c = 'Text'; // safe fallback
               }
             }
 
-            List<Table_Columns__c> colsToUpsert = new List<Table_Columns__c>();
-            for (Table_Columns__c col : columns) {
+            List<Shree_Tech__Table_Columns__c> colsToUpsert = new List<Shree_Tech__Table_Columns__c>();
+            for (Shree_Tech__Table_Columns__c col : columns) {
               if (col != null) {
                 colsToUpsert.add(col);
               }
@@ -588,14 +588,14 @@ public with sharing class SDTConfiguratorService {
 
           // 3. Prepare Actions
           if (actions != null) {
-            for (Table_Action__c action : actions) {
+            for (Shree_Tech__Table_Action__c action : actions) {
               if (action == null) continue;
               if (action.Id == null) {
-                action.Table__c = table.Id;
+                action.Shree_Tech__Table__c = table.Id;
               }
             }
-            List<Table_Action__c> actionsToUpsert = new List<Table_Action__c>();
-            for (Table_Action__c action : actions) {
+            List<Shree_Tech__Table_Action__c> actionsToUpsert = new List<Shree_Tech__Table_Action__c>();
+            for (Shree_Tech__Table_Action__c action : actions) {
               if (action != null) {
                 actionsToUpsert.add(action);
               }
@@ -607,10 +607,10 @@ public with sharing class SDTConfiguratorService {
 
           // 4. Handle Deletions (Columns)
           if (deletedColumnIds != null && !deletedColumnIds.isEmpty()) {
-            List<Table_Columns__c> toDelete = [
+            List<Shree_Tech__Table_Columns__c> toDelete = [
               SELECT Id
-              FROM Table_Columns__c
-              WHERE Id IN :deletedColumnIds AND Table_Name__c = :table.Id
+              FROM Shree_Tech__Table_Columns__c
+              WHERE Id IN :deletedColumnIds AND Shree_Tech__Table_Name__c = :table.Id
               WITH USER_MODE
             ];
             if (!toDelete.isEmpty()) {
@@ -620,10 +620,10 @@ public with sharing class SDTConfiguratorService {
 
           // 5. Handle Deletions (Actions)
           if (deletedActionIds != null && !deletedActionIds.isEmpty()) {
-            List<Table_Action__c> toDeleteActs = [
+            List<Shree_Tech__Table_Action__c> toDeleteActs = [
               SELECT Id
-              FROM Table_Action__c
-              WHERE Id IN :deletedActionIds AND Table__c = :table.Id
+              FROM Shree_Tech__Table_Action__c
+              WHERE Id IN :deletedActionIds AND Shree_Tech__Table__c = :table.Id
               WITH USER_MODE
             ];
             if (!toDeleteActs.isEmpty()) {
@@ -645,39 +645,39 @@ public with sharing class SDTConfiguratorService {
    * Clones a table configuration, its columns, and its actions.
    */
   public static void cloneTableConfig(Id tableId) {
-    Table__c tbl = SDTConfiguratorSelector.getTableById(tableId);
+    Shree_Tech__Table__c tbl = SDTConfiguratorSelector.getTableById(tableId);
     if (tbl == null)
       throw new DynamicTableException('Table not found.');
 
     try {
 
-          Table__c clonedTbl = tbl.clone(false, true, false, false);
+          Shree_Tech__Table__c clonedTbl = tbl.clone(false, true, false, false);
           String newName = 'Copy - ' + tbl.Name;
           if (newName.length() > 80)
             newName = newName.substring(0, 80);
           clonedTbl.Name = newName;
           insert as user clonedTbl;
 
-          List<Table_Columns__c> cols = SDTConfiguratorSelector.getColumnsByTableId(
+          List<Shree_Tech__Table_Columns__c> cols = SDTConfiguratorSelector.getColumnsByTableId(
             tableId
           );
-          List<Table_Columns__c> clonedCols = new List<Table_Columns__c>();
-          for (Table_Columns__c col : cols) {
-            Table_Columns__c clonedCol = col.clone(false, true, false, false);
-            clonedCol.Table_Name__c = clonedTbl.Id;
+          List<Shree_Tech__Table_Columns__c> clonedCols = new List<Shree_Tech__Table_Columns__c>();
+          for (Shree_Tech__Table_Columns__c col : cols) {
+            Shree_Tech__Table_Columns__c clonedCol = col.clone(false, true, false, false);
+            clonedCol.Shree_Tech__Table_Name__c = clonedTbl.Id;
             clonedCols.add(clonedCol);
           }
           if (!clonedCols.isEmpty()) {
             insert as user clonedCols;
           }
 
-          List<Table_Action__c> actions = SDTConfiguratorSelector.getActionsByTableId(
+          List<Shree_Tech__Table_Action__c> actions = SDTConfiguratorSelector.getActionsByTableId(
             tableId
           );
-          List<Table_Action__c> clonedActions = new List<Table_Action__c>();
-          for (Table_Action__c action : actions) {
-            Table_Action__c clonedAction = action.clone(false, true, false, false);
-            clonedAction.Table__c = clonedTbl.Id;
+          List<Shree_Tech__Table_Action__c> clonedActions = new List<Shree_Tech__Table_Action__c>();
+          for (Shree_Tech__Table_Action__c action : actions) {
+            Shree_Tech__Table_Action__c clonedAction = action.clone(false, true, false, false);
+            clonedAction.Shree_Tech__Table__c = clonedTbl.Id;
             clonedActions.add(clonedAction);
           }
           if (!clonedActions.isEmpty()) {

@@ -53,3 +53,8 @@ The project is simplified to contain only the essential components required to r
    Use the `Table__c` object in Salesforce to define a new table configuration and add columns via `Table_Columns__c`.
 3. **Use in App**:
    Drop the `simpleDataTable` component onto a Lightning Page in the App Builder and pass the `Table Name` as a property.
+
+
+## Namespace branch deployment
+
+This edition references `Shree_Tech__` configuration metadata. Use `manifest/namespace-runtime.xml` for existing namespace orgs. See [namespace deployment instructions](doc/namespace-deployment.md). Use branch `independent` for unprefixed orgs.

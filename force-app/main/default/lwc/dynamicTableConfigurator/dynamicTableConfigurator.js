@@ -32,27 +32,24 @@ const CHIP_BASE = "chip";
 const CHIP_ON = "chip chip--on";
 const CHIP_BLUE = "chip chip--on-blue";
 
+const CONFIG_NAMESPACE = "Shree_Tech__";
+
+// Keep the editor model unprefixed; translate only configuration API payloads.
 const addNamespace = (obj) => {
   if (!obj) return obj;
-  const newObj = { ...obj };
-  Object.keys(obj).forEach((key) => {
-    if (key.endsWith("__c") && !key.startsWith("")) {
-      newObj[`${key}`] = obj[key];
-      delete newObj[key];
-    }
-  });
-  return newObj;
+  return Object.fromEntries(Object.entries(obj).map(([key, value]) => [
+    key.endsWith("__c") && !key.startsWith(CONFIG_NAMESPACE)
+      ? CONFIG_NAMESPACE + key : key,
+    value
+  ]));
 };
 
 const stripNamespace = (obj) => {
   if (!obj) return obj;
-  const newObj = { ...obj };
-  Object.keys(obj).forEach((key) => {
-    if (key.startsWith("")) {
-      newObj[key.replace("", "")] = obj[key];
-    }
-  });
-  return newObj;
+  return Object.fromEntries(Object.entries(obj).map(([key, value]) => [
+    key.startsWith(CONFIG_NAMESPACE) ? key.slice(CONFIG_NAMESPACE.length) : key,
+    value
+  ]));
 };
 
 export default class DynamicTableConfigurator extends LightningElement {
@@ -881,7 +878,7 @@ export default class DynamicTableConfigurator extends LightningElement {
           Index__c: index,
           Filter_Type__c,
           Default_Filter_Value__c,
-          sobjectType: 'Table_Columns__c'
+          sobjectType: 'Shree_Tech__Table_Columns__c'
         });
       });
 
@@ -890,14 +887,14 @@ export default class DynamicTableConfigurator extends LightningElement {
         return addNamespace({ 
           ...rest, 
           Display_Order__c: index + 1,
-          sobjectType: 'Table_Action__c'
+          sobjectType: 'Shree_Tech__Table_Action__c'
         });
       });
 
       await saveMetadata({
         table: addNamespace({
           ...this.activeTable,
-          sobjectType: 'Table__c'
+          sobjectType: 'Shree_Tech__Table__c'
         }),
         columns: columnsToSave,
         actions: actionsToSave,
@@ -1668,7 +1665,7 @@ export default class DynamicTableConfigurator extends LightningElement {
       const tfo = { 
         ...this.newOverride, 
         Table__c: this.activeTable.Id,
-        sobjectType: 'Table_Feature_Override__c'
+        sobjectType: 'Shree_Tech__Table_Feature_Override__c'
       };
       await saveFeatureOverride({ featureOverride: addNamespace(tfo) });
       this.showToast("Success", "Override saved successfully.", "success");

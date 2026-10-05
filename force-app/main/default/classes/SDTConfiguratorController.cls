@@ -1,7 +1,7 @@
 public with sharing class SDTConfiguratorController {
 
 @AuraEnabled(cacheable=true)
-  public static List<Table__c> getAllTables() {
+  public static List<Shree_Tech__Table__c> getAllTables() {
     try {
       return SDTConfiguratorSelector.getAllTables();
     } catch (AuraHandledException ahe) {
@@ -21,11 +21,11 @@ public with sharing class SDTConfiguratorController {
 @AuraEnabled
   public static Map<String, Object> getTableMetadata(Id tableId) {
     try {
-      Table__c table = SDTConfiguratorSelector.getTableById(tableId);
-      List<Table_Columns__c> columns = SDTConfiguratorSelector.getColumnsByTableId(
+      Shree_Tech__Table__c table = SDTConfiguratorSelector.getTableById(tableId);
+      List<Shree_Tech__Table_Columns__c> columns = SDTConfiguratorSelector.getColumnsByTableId(
         tableId
       );
-      List<Table_Action__c> actions = SDTConfiguratorSelector.getActionsByTableId(
+      List<Shree_Tech__Table_Action__c> actions = SDTConfiguratorSelector.getActionsByTableId(
         tableId
       );
       return new Map<String, Object>{
@@ -102,9 +102,9 @@ public with sharing class SDTConfiguratorController {
 
 @AuraEnabled
   public static void saveMetadata(
-    Table__c table,
-    List<Table_Columns__c> columns,
-    List<Table_Action__c> actions,
+    Shree_Tech__Table__c table,
+    List<Shree_Tech__Table_Columns__c> columns,
+    List<Shree_Tech__Table_Action__c> actions,
     List<String> deletedIds,
     List<String> deletedActionIds
   ) {
@@ -133,9 +133,9 @@ public with sharing class SDTConfiguratorController {
 @AuraEnabled
   public static void deleteTableConfig(Id tableId) {
     try {
-      Table__c tbl = [
+      Shree_Tech__Table__c tbl = [
         SELECT Id
-        FROM Table__c
+        FROM Shree_Tech__Table__c
         WHERE Id = :tableId
         WITH USER_MODE
         LIMIT 1
@@ -175,7 +175,7 @@ public with sharing class SDTConfiguratorController {
 
 @AuraEnabled
   public static void saveFeatureOverride(
-    Table_Feature_Override__c featureOverride
+    Shree_Tech__Table_Feature_Override__c featureOverride
   ) {
     try {
       upsert as user featureOverride;
@@ -187,25 +187,25 @@ public with sharing class SDTConfiguratorController {
   }
 
 @AuraEnabled
-  public static List<Table_Feature_Override__c> getFeatureOverrides(
+  public static List<Shree_Tech__Table_Feature_Override__c> getFeatureOverrides(
     Id tableId
   ) {
     try {
       return [
         SELECT
           Id,
-          Context_Type__c,
-          Context_Value__c,
-          Override_Enable_Export__c,
-          Override_Enable_Import__c,
-          Override_Enable_Filters__c,
-          Override_New_Record__c,
-          Override_Hide_Row_Actions__c,
-          Override_Enable_Matrix_View__c,
-          Override_Enable_Column_Manager__c,
-          Override_Enable_Views__c
-        FROM Table_Feature_Override__c
-        WHERE Table__c = :tableId
+          Shree_Tech__Context_Type__c,
+          Shree_Tech__Context_Value__c,
+          Shree_Tech__Override_Enable_Export__c,
+          Shree_Tech__Override_Enable_Import__c,
+          Shree_Tech__Override_Enable_Filters__c,
+          Shree_Tech__Override_New_Record__c,
+          Shree_Tech__Override_Hide_Row_Actions__c,
+          Shree_Tech__Override_Enable_Matrix_View__c,
+          Shree_Tech__Override_Enable_Column_Manager__c,
+          Shree_Tech__Override_Enable_Views__c
+        FROM Shree_Tech__Table_Feature_Override__c
+        WHERE Shree_Tech__Table__c = :tableId
         WITH USER_MODE
       ];
     } catch (Exception e) {
@@ -220,7 +220,7 @@ public with sharing class SDTConfiguratorController {
     try {
       delete as user [
         SELECT Id
-        FROM Table_Feature_Override__c
+        FROM Shree_Tech__Table_Feature_Override__c
         WHERE Id = :overrideId
         WITH USER_MODE
       ];

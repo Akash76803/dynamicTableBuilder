@@ -20,30 +20,30 @@ public with sharing class SDTConfiguratorSelector {
   // ── Table metadata queries ────────────────────────────────────────────────
 
   /**
-   * Fetches a single Table__c record by its Name field.
+   * Fetches a single Shree_Tech__Table__c record by its Name field.
    */
-  public static Table__c getTableByName(String tableName) {
+  public static Shree_Tech__Table__c getTableByName(String tableName) {
     if (String.isBlank(tableName))
       return null;
     String trimmedName = tableName.trim();
-    List<Table__c> results = [
+    List<Shree_Tech__Table__c> results = [
       SELECT
         Id,
         Name,
-        Object_API_Name__c,
-        Object_Name__c,
-        Hide_Row_Actions__c,
-        Empty_State_Illustration__c,
-        Enable_Filters__c,
-        Enable_Matrix_View__c,
-        Enable_Column_Manager__c,
-        Enable_Views__c,
-        Enable_Import__c,
-        Enable_Export__c,
-        Enable_New_Record__c,
-        Enable_Infinite_Scroll__c,
-        Data_Load_Mode__c
-      FROM Table__c
+        Shree_Tech__Object_API_Name__c,
+        Shree_Tech__Object_Name__c,
+        Shree_Tech__Hide_Row_Actions__c,
+        Shree_Tech__Empty_State_Illustration__c,
+        Shree_Tech__Enable_Filters__c,
+        Shree_Tech__Enable_Matrix_View__c,
+        Shree_Tech__Enable_Column_Manager__c,
+        Shree_Tech__Enable_Views__c,
+        Shree_Tech__Enable_Import__c,
+        Shree_Tech__Enable_Export__c,
+        Shree_Tech__Enable_New_Record__c,
+        Shree_Tech__Enable_Infinite_Scroll__c,
+        Shree_Tech__Data_Load_Mode__c
+      FROM Shree_Tech__Table__c
       WHERE Name = :trimmedName
       WITH USER_MODE
       LIMIT 1
@@ -53,9 +53,9 @@ public with sharing class SDTConfiguratorSelector {
   }
 
   /**
-   * Helper to resolve Table__c config by either Name or Id.
+   * Helper to resolve Shree_Tech__Table__c config by either Name or Id.
    */
-  public static Table__c resolveTableConfig(String nameOrId) {
+  public static Shree_Tech__Table__c resolveTableConfig(String nameOrId) {
     if (String.isBlank(nameOrId))
       return null;
     try {
@@ -69,32 +69,32 @@ public with sharing class SDTConfiguratorSelector {
   }
 
   /**
-   * Fetches all Table_Columns__c records for a given Table__c Id,
+   * Fetches all Shree_Tech__Table_Columns__c records for a given Shree_Tech__Table__c Id,
    * ordered by the display order field (falls back to CreatedDate).
    */
-  public static List<Table_Columns__c> getColumnsByTableId(Id tableId) {
-    List<Table_Columns__c> cols = [
+  public static List<Shree_Tech__Table_Columns__c> getColumnsByTableId(Id tableId) {
+    List<Shree_Tech__Table_Columns__c> cols = [
       SELECT
         Id,
         Name,
-        Column_API_Name__c,
-        Data_Type__c,
-        Is_Editable__c,
-        Is_Sortable__c,
-        Is_Groupable__c,
-        Lookup_Field_API_Name__c,
-        Object_Reference__c,
-        Additional_Column__c,
-        Index__c,
-        Is_Visible__c,
-        Is_Searchable__c,
-        Is_Filterable__c,
-        Filter_Type__c,
-        Default_Filter_Value__c
-      FROM Table_Columns__c
-      WHERE Table_Name__c = :tableId
+        Shree_Tech__Column_API_Name__c,
+        Shree_Tech__Data_Type__c,
+        Shree_Tech__Is_Editable__c,
+        Shree_Tech__Is_Sortable__c,
+        Shree_Tech__Is_Groupable__c,
+        Shree_Tech__Lookup_Field_API_Name__c,
+        Shree_Tech__Object_Reference__c,
+        Shree_Tech__Additional_Column__c,
+        Shree_Tech__Index__c,
+        Shree_Tech__Is_Visible__c,
+        Shree_Tech__Is_Searchable__c,
+        Shree_Tech__Is_Filterable__c,
+        Shree_Tech__Filter_Type__c,
+        Shree_Tech__Default_Filter_Value__c
+      FROM Shree_Tech__Table_Columns__c
+      WHERE Shree_Tech__Table_Name__c = :tableId
       WITH USER_MODE
-      ORDER BY Index__c NULLS LAST, CreatedDate ASC
+      ORDER BY Shree_Tech__Index__c NULLS LAST, CreatedDate ASC
     ];
     System.debug(LoggingLevel.FINE, '[Selector] getColumnsByTableId');
     return cols;
@@ -161,52 +161,52 @@ public with sharing class SDTConfiguratorSelector {
   // ── Table Configuration Management (NEW) ──────────────────────────────────
 
   /**
-   * Fetches all Table__c records for the dashboard list.
+   * Fetches all Shree_Tech__Table__c records for the dashboard list.
    */
-  public static List<Table__c> getAllTables() {
+  public static List<Shree_Tech__Table__c> getAllTables() {
     return [
       SELECT
         Id,
         Name,
-        Object_API_Name__c,
-        Object_Name__c,
+        Shree_Tech__Object_API_Name__c,
+        Shree_Tech__Object_Name__c,
         CreatedDate,
-        Enable_Filters__c,
-        Enable_Matrix_View__c,
-        Enable_Column_Manager__c,
-        Enable_Views__c,
-        Enable_Import__c,
-        Enable_Export__c,
-        Enable_New_Record__c,
-        (SELECT Id FROM Table_Columns__r)
-      FROM Table__c
+        Shree_Tech__Enable_Filters__c,
+        Shree_Tech__Enable_Matrix_View__c,
+        Shree_Tech__Enable_Column_Manager__c,
+        Shree_Tech__Enable_Views__c,
+        Shree_Tech__Enable_Import__c,
+        Shree_Tech__Enable_Export__c,
+        Shree_Tech__Enable_New_Record__c,
+        (SELECT Id FROM Shree_Tech__Table_Columns__r)
+      FROM Shree_Tech__Table__c
       WITH USER_MODE
       ORDER BY Name ASC
     ];
   }
 
   /**
-   * Fetches a single Table__c by Id with its fields.
+   * Fetches a single Shree_Tech__Table__c by Id with its fields.
    */
-  public static Table__c getTableById(Id tableId) {
-    List<Table__c> results = [
+  public static Shree_Tech__Table__c getTableById(Id tableId) {
+    List<Shree_Tech__Table__c> results = [
       SELECT
         Id,
         Name,
-        Object_API_Name__c,
-        Object_Name__c,
-        Hide_Row_Actions__c,
-        Empty_State_Illustration__c,
-        Enable_Filters__c,
-        Enable_Matrix_View__c,
-        Enable_Column_Manager__c,
-        Enable_Views__c,
-        Enable_Import__c,
-        Enable_Export__c,
-        Enable_New_Record__c,
-        Enable_Infinite_Scroll__c,
-        Data_Load_Mode__c
-      FROM Table__c
+        Shree_Tech__Object_API_Name__c,
+        Shree_Tech__Object_Name__c,
+        Shree_Tech__Hide_Row_Actions__c,
+        Shree_Tech__Empty_State_Illustration__c,
+        Shree_Tech__Enable_Filters__c,
+        Shree_Tech__Enable_Matrix_View__c,
+        Shree_Tech__Enable_Column_Manager__c,
+        Shree_Tech__Enable_Views__c,
+        Shree_Tech__Enable_Import__c,
+        Shree_Tech__Enable_Export__c,
+        Shree_Tech__Enable_New_Record__c,
+        Shree_Tech__Enable_Infinite_Scroll__c,
+        Shree_Tech__Data_Load_Mode__c
+      FROM Shree_Tech__Table__c
       WHERE Id = :tableId
       WITH USER_MODE
       LIMIT 1
@@ -215,22 +215,22 @@ public with sharing class SDTConfiguratorSelector {
   }
 
   /**
-   * Fetches all Table_Action__c records for a given Table__c Id.
+   * Fetches all Shree_Tech__Table_Action__c records for a given Shree_Tech__Table__c Id.
    */
-  public static List<Table_Action__c> getActionsByTableId(Id tableId) {
+  public static List<Shree_Tech__Table_Action__c> getActionsByTableId(Id tableId) {
     return [
       SELECT
         Id,
         Name,
-        Label__c,
-        Icon__c,
-        Action_Type__c,
-        Target__c,
-        Requires_Selection__c
-      FROM Table_Action__c
-      WHERE Table__c = :tableId
+        Shree_Tech__Label__c,
+        Shree_Tech__Icon__c,
+        Shree_Tech__Action_Type__c,
+        Shree_Tech__Target__c,
+        Shree_Tech__Requires_Selection__c
+      FROM Shree_Tech__Table_Action__c
+      WHERE Shree_Tech__Table__c = :tableId
       WITH USER_MODE
-      ORDER BY Display_Order__c ASC NULLS LAST, CreatedDate ASC
+      ORDER BY Shree_Tech__Display_Order__c ASC NULLS LAST, CreatedDate ASC
     ];
   }
 
@@ -247,13 +247,13 @@ public with sharing class SDTConfiguratorSelector {
   
 
   /**
-   * Fetches all Table_User_View__c records for a given table name belonging to the current user,
-   * ordered by Is_Default__c DESC, Name ASC.
+   * Fetches all Shree_Tech__Table_User_View__c records for a given table name belonging to the current user,
+   * ordered by Shree_Tech__Is_Default__c DESC, Name ASC.
    */
   
 
   /**
-   * Fetches a single Table_User_View__c by its Id.
+   * Fetches a single Shree_Tech__Table_User_View__c by its Id.
    */
   
 }

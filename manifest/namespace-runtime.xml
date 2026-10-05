@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+  <types>
+    <members>SDTConfiguratorController</members>
+    <members>SDTConfiguratorDTO</members>
+    <members>SDTConfiguratorSelector</members>
+    <members>SDTConfiguratorService</members>
+    <members>SimpleTableController</members>
+    <members>SimpleTableDTO</members>
+    <members>SimpleTableService</members>
+    <name>ApexClass</name>
+  </types>
+  <types>
+    <members>dynamicTableConfigurator</members>
+    <members>sdtColManager</members>
+    <members>sdtFilterPanel</members>
+    <members>sdtMultiSelect</members>
+    <members>simpleDataTable</members>
+    <name>LightningComponentBundle</name>
+  </types>
+  <version>67.0</version>
+</Package>

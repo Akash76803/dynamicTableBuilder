@@ -10,8 +10,8 @@
  *   - with sharing enforced on the controller class.
  *
  * Queries use:
- *   - Table__c         (Shree_Tech namespace — resolved via full API name)
- *   - Table_Columns__c (Shree_Tech namespace)
+ *   - Shree_Tech__Table__c         (Shree_Tech namespace — resolved via full API name)
+ *   - Shree_Tech__Table_Columns__c (Shree_Tech namespace)
  *
  * Layer:  Service
  * Called by: SimpleTableController
@@ -27,7 +27,7 @@ public inherited sharing class SimpleTableService {
     /**
      * Main method: load config, build SOQL, fetch records, map to DTOs.
      *
-     * @param tableName  Name field on Table__c — identifies which config to use
+     * @param tableName  Name field on Shree_Tech__Table__c — identifies which config to use
      * @param parentId   Optional — when on a record page, auto-filters child records
      * @return           TableResult DTO for LWC consumption
      */
@@ -40,16 +40,16 @@ public inherited sharing class SimpleTableService {
         String sortDirection
     ) {
 
-        // 1. Validate input & fetch Table__c config
+        // 1. Validate input & fetch Shree_Tech__Table__c config
         if (String.isBlank(tableName)) {
             throw new AuraHandledException('tableName is required.');
         }
 
-        Table__c tableConfig = fetchTableConfig(tableName);
-        String baseObject = tableConfig.Object_API_Name__c;
+        Shree_Tech__Table__c tableConfig = fetchTableConfig(tableName);
+        String baseObject = tableConfig.Shree_Tech__Object_API_Name__c;
 
-        // 2. Fetch column configs (Table_Columns__c records)
-        List<Table_Columns__c> rawCols = fetchColumnConfigs(tableConfig.Id);
+        // 2. Fetch column configs (Shree_Tech__Table_Columns__c records)
+        List<Shree_Tech__Table_Columns__c> rawCols = fetchColumnConfigs(tableConfig.Id);
 
         // 3. Build ColumnDef DTOs + SOQL field list
         List<SimpleTableDTO.ColumnDef>  columns      = new List<SimpleTableDTO.ColumnDef>();
@@ -60,19 +60,19 @@ public inherited sharing class SimpleTableService {
         String parentObjType     = String.isNotBlank(parentId) ? getObjectTypeFromId(parentId) : null;
 
         Integer idx = 0;
-        for (Table_Columns__c col : rawCols) {
+        for (Shree_Tech__Table_Columns__c col : rawCols) {
             SimpleTableDTO.ColumnDef cd = buildColumnDef(col, baseObject, idx);
             columns.add(cd);
 
             // Collect SOQL fields (skip additional/formula-only cols)
-            if (!col.Additional_Column__c && String.isNotBlank(cd.soqlFieldPath)) {
+            if (!col.Shree_Tech__Additional_Column__c && String.isNotBlank(cd.soqlFieldPath)) {
                 String path = cd.soqlFieldPath.toLowerCase();
                 if (!soqlFields.contains(path)) {
                     soqlFields.add(path);
                 }
                 // Also pull lookup Id field if present
-                if (cd.isLookup && String.isNotBlank(col.Lookup_Field_API_Name__c)) {
-                    String lf = col.Lookup_Field_API_Name__c.toLowerCase();
+                if (cd.isLookup && String.isNotBlank(col.Shree_Tech__Lookup_Field_API_Name__c)) {
+                    String lf = col.Shree_Tech__Lookup_Field_API_Name__c.toLowerCase();
                     if (!soqlFields.contains(lf)) soqlFields.add(lf);
                 }
                 keyToSoql.put(cd.key, path);
@@ -80,11 +80,11 @@ public inherited sharing class SimpleTableService {
 
             // Auto-detect parent filter field from Lookup column referencing parent object
             if (String.isNotBlank(parentId) && parentFilterField == null
-                && String.isNotBlank(col.Lookup_Field_API_Name__c)
+                && String.isNotBlank(col.Shree_Tech__Lookup_Field_API_Name__c)
                 && String.isNotBlank(parentObjType)
-                && col.Object_Reference__c != null
-                && col.Object_Reference__c.equalsIgnoreCase(parentObjType)) {
-                parentFilterField = col.Lookup_Field_API_Name__c;
+                && col.Shree_Tech__Object_Reference__c != null
+                && col.Shree_Tech__Object_Reference__c.equalsIgnoreCase(parentObjType)) {
+                parentFilterField = col.Shree_Tech__Lookup_Field_API_Name__c;
             }
 
             idx++;
@@ -128,12 +128,12 @@ public inherited sharing class SimpleTableService {
 
     // ─── Config Fetching ─────────────────────────────────────────────────────
 
-    private static Table__c fetchTableConfig(String tableName) {
-        List<Table__c> configs = [
+    private static Shree_Tech__Table__c fetchTableConfig(String tableName) {
+        List<Shree_Tech__Table__c> configs = [
             SELECT Id, Name,
-                   Object_API_Name__c,
-                   Object_Name__c
-            FROM   Table__c
+                   Shree_Tech__Object_API_Name__c,
+                   Shree_Tech__Object_Name__c
+            FROM   Shree_Tech__Table__c
             WHERE  Name = :tableName
             LIMIT  1
         ];
@@ -145,24 +145,24 @@ public inherited sharing class SimpleTableService {
         return configs[0];
     }
 
-    private static List<Table_Columns__c> fetchColumnConfigs(Id tableId) {
-        List<Table_Columns__c> cols = [
+    private static List<Shree_Tech__Table_Columns__c> fetchColumnConfigs(Id tableId) {
+        List<Shree_Tech__Table_Columns__c> cols = [
             SELECT Id, Name,
-                   Column_API_Name__c,
-                   Data_Type__c,
-                   Index__c,
-                   Is_Sortable__c,
-                   Is_Filterable__c,
-                   Is_Searchable__c,
-                   Is_Visible__c,
-                   Additional_Column__c,
-                   Lookup_Field_API_Name__c,
-                   Object_Reference__c,
-                   Aggregate__c
-            FROM   Table_Columns__c
-            WHERE  Table_Name__c = :tableId
-            AND    Is_Visible__c = true
-            ORDER BY Index__c ASC NULLS LAST
+                   Shree_Tech__Column_API_Name__c,
+                   Shree_Tech__Data_Type__c,
+                   Shree_Tech__Index__c,
+                   Shree_Tech__Is_Sortable__c,
+                   Shree_Tech__Is_Filterable__c,
+                   Shree_Tech__Is_Searchable__c,
+                   Shree_Tech__Is_Visible__c,
+                   Shree_Tech__Additional_Column__c,
+                   Shree_Tech__Lookup_Field_API_Name__c,
+                   Shree_Tech__Object_Reference__c,
+                   Shree_Tech__Aggregate__c
+            FROM   Shree_Tech__Table_Columns__c
+            WHERE  Shree_Tech__Table_Name__c = :tableId
+            AND    Shree_Tech__Is_Visible__c = true
+            ORDER BY Shree_Tech__Index__c ASC NULLS LAST
         ];
         if (cols.isEmpty()) {
             throw new AuraHandledException('No visible columns configured for this table.');
@@ -173,28 +173,28 @@ public inherited sharing class SimpleTableService {
     // ─── ColumnDef Builder ───────────────────────────────────────────────────
 
     private static SimpleTableDTO.ColumnDef buildColumnDef(
-        Table_Columns__c col,
+        Shree_Tech__Table_Columns__c col,
         String baseObject,
         Integer idx
     ) {
         SimpleTableDTO.ColumnDef cd = new SimpleTableDTO.ColumnDef();
         cd.key       = 'col' + idx;
         cd.label     = col.Name;
-        cd.fieldName = col.Column_API_Name__c;
-        cd.dataType  = col.Data_Type__c != null ? col.Data_Type__c : 'Text';
-        cd.sortable  = col.Is_Sortable__c == true;
-        cd.filterable = col.Is_Filterable__c == true;
-        cd.searchable = col.Is_Searchable__c == true;
-        cd.sortOrder  = col.Index__c != null ? col.Index__c.intValue() : idx;
+        cd.fieldName = col.Shree_Tech__Column_API_Name__c;
+        cd.dataType  = col.Shree_Tech__Data_Type__c != null ? col.Shree_Tech__Data_Type__c : 'Text';
+        cd.sortable  = col.Shree_Tech__Is_Sortable__c == true;
+        cd.filterable = col.Shree_Tech__Is_Filterable__c == true;
+        cd.searchable = col.Shree_Tech__Is_Searchable__c == true;
+        cd.sortOrder  = col.Shree_Tech__Index__c != null ? col.Shree_Tech__Index__c.intValue() : idx;
         
         try {
-            cd.aggregate = (String)col.get('Aggregate__c');
+            cd.aggregate = (String)col.get('Shree_Tech__Aggregate__c');
         } catch (Exception e) {
             cd.aggregate = 'None';
         }
 
         // Build SOQL path — handle dot-notation for relationship traversal
-        String apiName = col.Column_API_Name__c;
+        String apiName = col.Shree_Tech__Column_API_Name__c;
         if (String.isNotBlank(apiName)) {
             // If it already has a dot it's already a traversal path
             cd.soqlFieldPath = apiName.toLowerCase();
