@@ -1,115 +1,22 @@
 <template>
-  <div class="sdt-filter-panel">
-    <!-- Header -->
-    <div class="panel-header">
-      <span class="panel-title">Filters</span>
-      <button class="panel-close-btn" onclick={handleClose} title="Close">✕</button>
-    </div>
-
-    <!-- Actions (Top) -->
-    <div class="panel-actions">
-      <button class="btn-add-filter" onclick={handleAddRow}>+ Add Filter</button>
-      <div class="footer-right">
-        <button class="btn-clear" onclick={handleClear} disabled={noFilters}>Clear All</button>
-        <button class="btn-apply" onclick={handleApply}>Apply</button>
-      </div>
-    </div>
-
-    <!-- Filter rows -->
-    <div class="filter-rows">
-      <template for:each={filterRows} for:item="row">
-        <div key={row.id} class="filter-row">
-
-          <!-- Field Selector -->
-          <select
-            class="filter-select filter-field"
-            data-id={row.id}
-            data-col="fieldName"
-            onchange={handleFieldChange}
-          >
-            <option value="">-- Field --</option>
-            <template for:each={filterableColumns} for:item="col">
-              <option key={col.key} value={col.key}>{col.label}</option>
-            </template>
-          </select>
-
-          <!-- Operator Selector -->
-          <template if:true={row.fieldKey}>
-            <select
-              class="filter-select filter-op"
-              data-id={row.id}
-              data-col="operator"
-              onchange={handleOperatorChange}
-            >
-              <option value="">-- Operator --</option>
-              <template for:each={row.operators} for:item="op">
-                <option key={op.value} value={op.value}>{op.label}</option>
-              </template>
-            </select>
-          </template>
-
-          <!-- Value Input (single) -->
-          <template if:true={row.showSingleInput}>
-            <input
-              type={row.inputType}
-              class="filter-input"
-              placeholder="Value..."
-              value={row.value}
-              data-id={row.id}
-              data-col="value"
-              onchange={handleValueChange}
-            />
-          </template>
-
-          <!-- Picklist Input (multi-select combobox) -->
-          <template if:true={row.showPicklistInput}>
-            <div class="filter-input-wrapper" style="flex: 1 1 100px; min-width: 80px;">
-              <c-sdt-multi-select
-                options={row.picklistOptions}
-                value={row.value}
-                data-id={row.id}
-                onchange={handleMultiSelectChange}
-              ></c-sdt-multi-select>
-            </div>
-          </template>
-
-          <!-- Value Input (between / range) -->
-          <template if:true={row.showRangeInput}>
-            <input
-              type={row.inputType}
-              class="filter-input filter-input--half"
-              placeholder="Min"
-              value={row.valueMin}
-              data-id={row.id}
-              data-col="valueMin"
-              onchange={handleValueChange}
-            />
-            <input
-              type={row.inputType}
-              class="filter-input filter-input--half"
-              placeholder="Max"
-              value={row.valueMax}
-              data-id={row.id}
-              data-col="valueMax"
-              onchange={handleValueChange}
-            />
-          </template>
-
-          <!-- Remove row button -->
-          <button
-            class="filter-remove-btn"
-            data-id={row.id}
-            onclick={handleRemoveRow}
-            title="Remove filter"
-          >✕</button>
-
-        </div>
-      </template>
-
-      <!-- Empty state -->
-      <template if:false={hasFilterRows}>
-        <p class="filter-empty">No filters added yet. Click "+ Add Filter" above.</p>
-      </template>
-    </div>
+ <div class="sdt-filter-panel">
+  <div class="panel-header"><div><span class="panel-title">Filters</span><p class="panel-subtitle">Build conditions for this table</p></div><lightning-button-icon icon-name="utility:close" alternative-text="Close filters" onclick={handleClose} variant="bare"></lightning-button-icon></div>
+  <div class="filter-content">
+   <template for:each={displayRows} for:item="row">
+    <section key={row.id} class="filter-row">
+     <div class="row-header"><span class="condition-number">{row.number}</span><span>Condition {row.number}</span><lightning-button-icon class="remove-button" icon-name="utility:delete" alternative-text="Remove condition" data-id={row.id} onclick={handleRemoveRow} variant="bare"></lightning-button-icon></div>
+     <label class="field-control"><span>Field</span><select class="filter-select" data-id={row.id} onchange={handleFieldChange}><option value="">Select field</option><template for:each={row.fields} for:item="col"><option key={col.key} value={col.key} selected={col.selected}>{col.label}</option></template></select></label>
+     <template if:true={row.fieldKey}><label class="field-control"><span>Operator</span><select class="filter-select" data-id={row.id} onchange={handleOperatorChange}><option value="">Select operator</option><template for:each={row.operatorOptions} for:item="op"><option key={op.value} value={op.value} selected={op.selected}>{op.label}</option></template></select></label></template>
+     <template if:true={row.showSingleInput}><label class="field-control"><span>Value</span><input type={row.inputType} class="filter-input" value={row.value} data-id={row.id} data-col="value" onchange={handleValueChange}/></label></template>
+     <template if:true={row.showPicklistInput}><div class="field-control"><span>Values</span><c-sdt-multi-select options={row.picklistOptions} value={row.value} data-id={row.id} onchange={handleMultiSelectChange}></c-sdt-multi-select></div></template>
+     <template if:true={row.showRangeInput}><div class="range-fields"><label class="field-control"><span>{row.minLabel}</span><input type={row.inputType} class="filter-input" value={row.valueMin} data-id={row.id} data-col="valueMin" onchange={handleValueChange}/></label><label class="field-control"><span>{row.maxLabel}</span><input type={row.inputType} class="filter-input" value={row.valueMax} data-id={row.id} data-col="valueMax" onchange={handleValueChange}/></label></div></template>
+    </section>
+   </template>
+   <template if:false={hasFilterRows}><p class="filter-empty">No filters added. Add a condition to get started.</p></template>
+   <button class="btn-add-filter" onclick={handleAddRow}>+ Add filter</button>
+   <div class="logic-section"><label class="field-control"><span>Match conditions</span><select class="filter-select" onchange={handleLogicChange}><template for:each={logicOptions} for:item="option"><option key={option.value} value={option.value} selected={option.selected}>{option.label}</option></template></select></label><template if:true={isCustomLogic}><label class="field-control"><span>Filter logic</span><input class="filter-input" value={expression} oninput={handleExpressionChange} placeholder="(1 OR 2) AND 3"/></label><p class="panel-subtitle">Use every condition number with AND, OR and parentheses. Check numbers after removing a condition.</p></template></div>
+   <template if:true={validationError}><p class="validation-error" role="alert">{validationError}</p></template>
   </div>
+  <div class="panel-footer"><button class="btn-clear" onclick={handleClear} disabled={noFilters}>Clear all</button><button class="btn-apply" onclick={handleApply} disabled={applyDisabled}>Apply filters</button></div>
+ </div>
 </template>

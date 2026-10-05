@@ -75,12 +75,41 @@ export default class SdtFilterPanel extends LightningElement {
 
     /** Currently applied filters (to pre-populate rows on re-open) */
     @api activeFilters = [];
+    @api activeLogic = 'AND';
+    @api activeExpression = '';
+    logic = 'AND';
+    expression = '';
+    get logicOptions() { return [{ value: 'AND', label: 'All conditions (AND)' }, { value: 'OR', label: 'Any condition (OR)' }, { value: 'CUSTOM', label: 'Custom logic' }].map(o => ({ ...o, selected: o.value === this.logic })); }
+    get isCustomLogic() { return this.logic === 'CUSTOM'; }
+    get displayRows() { return this.filterRows.map((r, i) => ({ ...r, number: i + 1, minLabel: r.dataType === 'date' || r.dataType === 'datetime' ? 'From' : 'Minimum', maxLabel: r.dataType === 'date' || r.dataType === 'datetime' ? 'To' : 'Maximum', fields: this.filterableColumns.map(c => ({ ...c, selected: c.key === r.fieldKey })), operatorOptions: r.operators.map(o => ({ ...o, selected: o.value === r.operator })) })); }
+    handleLogicChange(event) { this.logic = event.target.value; }
+    handleExpressionChange(event) { this.expression = event.target.value; }
+    get validationError() {
+        if (this.filterRows.length > 50) return 'Maximum 50 conditions.';
+        if (this.filterRows.some(r => !r.fieldKey || !r.operator || (r.showSingleInput || r.showPicklistInput) && !String(r.value ?? '').trim() || r.showRangeInput && (r.valueMin === '' || r.valueMax === ''))) return 'Complete every condition before applying.';
+        if (!this.isCustomLogic) return '';
+        try {
+            const text = this.expression.toUpperCase();
+            const tokens = text.match(/\d+|AND|OR|[()]/g) || [];
+            if (!text || text.length > 1000 || tokens.length > 200 || tokens.join('') !== text.replace(/\s/g, '')) throw Error('Use condition numbers, AND, OR and parentheses.');
+            let p = 0; const used = new Set();
+            const atom = () => { const t = tokens[p++]; if (t === '(') { or(); if (tokens[p++] !== ')') throw Error('Close the parentheses.'); } else { const n = Number(t); if (!/^\d+$/.test(t || '') || t.length > 3 || n < 1 || n > this.filterRows.length) throw Error('Use valid condition numbers.'); used.add(n); } };
+            const and = () => { atom(); while (tokens[p] === 'AND') { p++; atom(); } };
+            const or = () => { and(); while (tokens[p] === 'OR') { p++; and(); } };
+            or(); if (p !== tokens.length) throw Error('Add AND or OR between conditions.');
+            if (used.size !== this.filterRows.length) throw Error('Include every condition number in the expression.');
+            return '';
+        } catch (error) { return error.message; }
+    }
+    get applyDisabled() { return !!this.validationError; }
 
     @track filterRows = [];
 
     // ─── Lifecycle ────────────────────────────────────────────────────────────
 
     connectedCallback() {
+        this.logic = this.activeLogic || 'AND';
+        this.expression = this.activeExpression || '';
         // Pre-populate from activeFilters if any
         if (this.activeFilters && this.activeFilters.length > 0) {
             this.filterRows = this.activeFilters.map(f => {
@@ -91,9 +120,9 @@ export default class SdtFilterPanel extends LightningElement {
                 row.dataType  = dt;
                 row.operators = TYPE_OPERATORS[dt] || TYPE_OPERATORS.text;
                 row.operator  = f.operator;
-                row.value     = f.value    || '';
-                row.valueMin  = f.valueMin || '';
-                row.valueMax  = f.valueMax || '';
+                row.value     = f.value    ?? '';
+                row.valueMin  = f.valueMin ?? '';
+                row.valueMax  = f.valueMax ?? '';
                 
                 let selectedVals = row.value ? row.value.split(';') : [];
                 if (col && col.picklistOptions) {
@@ -202,6 +231,7 @@ export default class SdtFilterPanel extends LightningElement {
     }
 
     handleApply() {
+        if (this.applyDisabled) return;
         // Build filter payload and fire event
         const filters = this.filterRows
             .filter(r => r.fieldKey && r.operator)
@@ -214,12 +244,13 @@ export default class SdtFilterPanel extends LightningElement {
             }));
 
         this.dispatchEvent(new CustomEvent('filterchange', {
-            detail: { logic: 'AND', filters },
+            detail: { logic: this.logic, expression: this.expression, filters },
             bubbles: true,
         }));
     }
 
     handleClear() {
+        this.logic = 'AND'; this.expression = '';
         this.filterRows = [];
         this.dispatchEvent(new CustomEvent('filterchange', {
             detail: { logic: 'AND', filters: [] },

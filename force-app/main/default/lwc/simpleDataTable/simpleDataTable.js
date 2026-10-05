@@ -12,6 +12,8 @@ export default class SimpleDataTable extends LightningElement {
     @track filteredRows = [];
     @track aggregateRow = [];
     @track activeFilters = [];
+    filterLogic = 'AND';
+    filterExpression = '';
     @track columnOrder = [];
 
     searchTerm = '';
@@ -53,7 +55,7 @@ export default class SimpleDataTable extends LightningElement {
 
     loadData() {
         this.isLoading = true;
-        const filtersJson = this.activeFilters.length > 0 ? JSON.stringify(this.activeFilters) : null;
+        const filtersJson = this.activeFilters.length > 0 ? JSON.stringify(this.filterLogic === 'AND' ? this.activeFilters : { filters: this.activeFilters, logic: this.filterLogic, expression: this.filterExpression }) : null;
         
         getTableData({
             tableName: this.tableName,
@@ -300,18 +302,26 @@ export default class SimpleDataTable extends LightningElement {
     handleFilterChange(event) {
         const payload = event.detail; // { logic: 'AND', filters: [...] }
         this.activeFilters = payload.filters;
+        this.filterLogic = payload.logic || 'AND';
+        this.filterExpression = payload.expression || '';
         this.currentPage = 1;
         this.loadData();
     }
 
     removeFilter(event) {
         const keyToRemove = event.currentTarget.dataset.key;
+        if (this.filterLogic === 'CUSTOM') {
+            this.showFilterPanel = true;
+            return;
+        }
         this.activeFilters = this.activeFilters.filter(f => f.fieldKey !== keyToRemove);
         this.currentPage = 1;
         this.loadData();
     }
 
     clearAllFilters() {
+        this.filterLogic = 'AND';
+        this.filterExpression = '';
         this.activeFilters = [];
         this.currentPage = 1;
         this.loadData();

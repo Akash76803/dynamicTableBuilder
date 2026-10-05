@@ -166,7 +166,8 @@
 
 /* Side Panels */
 .sdt-side-panel {
-    width: 320px;
+    width: 400px;
+    max-width: 100%;
     border-left: 1px solid #e5e7eb;
     background: #fff;
     flex-shrink: 0;

@@ -278,6 +278,7 @@ public inherited sharing class SimpleTableService {
 
     // ─── SOQL Builder ────────────────────────────────────────────────────────
 
+    @TestVisible
     private static String buildQuery(
         String                         baseObject,
         List<String>                   fields,
@@ -313,29 +314,46 @@ public inherited sharing class SimpleTableService {
             }
         }
 
-        // Add column filters
+        // Accept the original array payload and the logic-aware envelope.
         if (String.isNotBlank(filtersJson)) {
             try {
-                List<SimpleTableDTO.FilterDef> filters = (List<SimpleTableDTO.FilterDef>)JSON.deserialize(filtersJson, List<SimpleTableDTO.FilterDef>.class);
+                String mode = 'AND';
+                String expression;
+                String filterArray = filtersJson;
+                if (filtersJson.trim().startsWith('{')) {
+                    Map<String, Object> envelope = (Map<String, Object>)JSON.deserializeUntyped(filtersJson);
+                    mode = (String)envelope.get('logic');
+                    expression = (String)envelope.get('expression');
+                    filterArray = JSON.serialize(envelope.get('filters'));
+                }
+                if (String.isBlank(mode)) mode = 'AND';
+                if (mode != 'AND' && mode != 'OR' && mode != 'CUSTOM') throw new AuraHandledException('Invalid filter mode.');
+                List<SimpleTableDTO.FilterDef> filters = (List<SimpleTableDTO.FilterDef>)JSON.deserialize(filterArray, List<SimpleTableDTO.FilterDef>.class);
+                if (filters == null || filters.size() > 50) throw new AuraHandledException('Maximum 50 filter conditions.');
+                List<String> compiled = new List<String>();
                 for (SimpleTableDTO.FilterDef f : filters) {
                     String colPath = '';
                     String dataType = 'Text';
                     for (SimpleTableDTO.ColumnDef c : columns) {
-                        if (c.key == f.fieldKey) {
-                            colPath = c.soqlFieldPath;
-                            dataType = c.dataType;
-                            break;
+                        if (c.key == f.fieldKey && c.filterable == true) {
+                            colPath = c.soqlFieldPath; dataType = c.dataType; break;
                         }
                     }
-                    if (String.isBlank(colPath)) continue;
-
+                    if (String.isBlank(colPath)) throw new AuraHandledException('Invalid filter field.');
                     String condition = buildFilterCondition(colPath, dataType, f);
-                    if (String.isNotBlank(condition)) {
-                        conditions.add(condition);
-                    }
+                    if (String.isBlank(condition)) throw new AuraHandledException('Complete every filter condition.');
+                    compiled.add('(' + condition + ')');
                 }
-            } catch(Exception e) {
-                // Ignore parse errors for filters
+                if (!compiled.isEmpty()) {
+                    String groupCondition = mode == 'CUSTOM'
+                        ? compileFilterLogic(expression, compiled)
+                        : String.join(compiled, ' ' + mode + ' ');
+                    conditions.add('(' + groupCondition + ')');
+                } else if (mode == 'CUSTOM') {
+                    throw new AuraHandledException('Add conditions before using custom logic.');
+                }
+            } catch (Exception e) {
+                throw new AuraHandledException('Invalid filters: ' + e.getMessage());
             }
         }
 
@@ -366,14 +384,18 @@ public inherited sharing class SimpleTableService {
         String val = f.value;
         String op = f.operator;
         
+        if (op == 'is_blank') op = 'is_null';
+        if (op == 'is_not_blank') op = 'is_not_null';
+        if (op == 'before') op = 'less_than';
+        if (op == 'after') op = 'greater_than';
+        if (op == 'is_true') return field + ' = TRUE';
+        if (op == 'is_false') return field + ' = FALSE';
         if (op == 'is_null') return field + ' = NULL';
         if (op == 'is_not_null') return field + ' != NULL';
         
         if (String.isBlank(val) && op != 'is_null' && op != 'is_not_null' && op != 'between') return null;
 
-        Boolean isNumOrDate = dataType.equalsIgnoreCase('Number') || dataType.equalsIgnoreCase('Currency') || dataType.equalsIgnoreCase('Percent') || dataType.equalsIgnoreCase('Percentage') || dataType.equalsIgnoreCase('Date') || dataType.equalsIgnoreCase('DateTime') || dataType.equalsIgnoreCase('Boolean');
-        
-        String safeVal = isNumOrDate ? String.escapeSingleQuotes(val) : '\'' + String.escapeSingleQuotes(val) + '\'';
+        String safeVal = String.isBlank(val) ? null : filterLiteral(val, dataType);
 
         if (op == 'equals') return field + ' = ' + safeVal;
         if (op == 'not_equals') return field + ' != ' + safeVal;
@@ -401,12 +423,29 @@ public inherited sharing class SimpleTableService {
         
         if (op == 'between') {
             if (String.isNotBlank(f.valueMin) && String.isNotBlank(f.valueMax)) {
-                String safeMin = isNumOrDate ? String.escapeSingleQuotes(f.valueMin) : '\'' + String.escapeSingleQuotes(f.valueMin) + '\'';
-                String safeMax = isNumOrDate ? String.escapeSingleQuotes(f.valueMax) : '\'' + String.escapeSingleQuotes(f.valueMax) + '\'';
+                String safeMin = filterLiteral(f.valueMin, dataType);
+                String safeMax = filterLiteral(f.valueMax, dataType);
                 return '(' + field + ' >= ' + safeMin + ' AND ' + field + ' <= ' + safeMax + ')';
             }
         }
         return null;
+    }
+
+    private static String filterLiteral(String value, String dataType) {
+        if (dataType.equalsIgnoreCase('Number') || dataType.equalsIgnoreCase('Currency') || dataType.equalsIgnoreCase('Percent') || dataType.equalsIgnoreCase('Percentage')) {
+            return String.valueOf(Decimal.valueOf(value));
+        }
+        if (dataType.equalsIgnoreCase('Date')) return String.valueOf(Date.valueOf(value));
+        if (dataType.equalsIgnoreCase('DateTime')) {
+            String normalized = value.replace('T', ' ').replace('Z', '');
+            if (normalized.length() == 16) normalized += ':00';
+            return Datetime.valueOfGmt(normalized).formatGmt('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'');
+        }
+        if (dataType.equalsIgnoreCase('Boolean')) {
+            if (value != 'true' && value != 'false') throw new AuraHandledException('Invalid boolean value.');
+            return value.toUpperCase();
+        }
+        return '\'' + String.escapeSingleQuotes(value) + '\'';
     }
 
     // ─── Record → DTO Mapper ─────────────────────────────────────────────────
@@ -514,5 +553,56 @@ public inherited sharing class SimpleTableService {
             }
         }
         return fieldMapCache.get(key);
+    }
+
+    @TestVisible
+    private static String compileFilterLogic(String expression, List<String> conditions) {
+        return new FilterLogicParser(expression, conditions).parse();
+    }
+
+    // Grammar: numbers, AND, OR and parentheses only. No user text enters SOQL.
+    private class FilterLogicParser {
+        List<String> tokens = new List<String>();
+        List<String> conditions;
+        Set<Integer> used = new Set<Integer>();
+        Integer position = 0;
+        FilterLogicParser(String expression, List<String> compiled) {
+            conditions = compiled;
+            if (String.isBlank(expression) || expression.length() > 1000) fail();
+            String normalized = expression.toUpperCase();
+            Matcher matcher = Pattern.compile('[0-9]+|AND|OR|[()]').matcher(normalized);
+            while (matcher.find()) tokens.add(matcher.group());
+            if (String.join(tokens, '') != normalized.replaceAll('\\s', '') || tokens.size() > 200) fail();
+        }
+        String parse() {
+            String result = parseOr();
+            if (position != tokens.size() || used.size() != conditions.size()) fail();
+            return result;
+        }
+        String parseOr() {
+            String result = parseAnd();
+            while (peek() == 'OR') { position++; result = '(' + result + ' OR ' + parseAnd() + ')'; }
+            return result;
+        }
+        String parseAnd() {
+            String result = parseAtom();
+            while (peek() == 'AND') { position++; result = '(' + result + ' AND ' + parseAtom() + ')'; }
+            return result;
+        }
+        String parseAtom() {
+            String token = peek(); position++;
+            if (token == '(') {
+                String result = parseOr();
+                if (peek() != ')') fail();
+                position++; return '(' + result + ')';
+            }
+            if (token == null || !Pattern.matches('[0-9]+', token) || token.length() > 3) fail();
+            Integer numberValue = Integer.valueOf(token);
+            if (numberValue < 1 || numberValue > conditions.size()) fail();
+            used.add(numberValue);
+            return '(' + conditions[numberValue - 1] + ')';
+        }
+        String peek() { return position < tokens.size() ? tokens[position] : null; }
+        void fail() { throw new AuraHandledException('Invalid filter logic. Use every condition number with AND, OR and parentheses.'); }
     }
 }
