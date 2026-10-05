@@ -2,19 +2,19 @@ import { LightningElement, track, wire } from "lwc";
 import { getObjectInfo } from "lightning/uiObjectInfoApi";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { refreshApex } from "@salesforce/apex";
-import getAllTables from "@salesforce/apex/DynamicTableController.getAllTables";
-import getTableMetadata from "@salesforce/apex/DynamicTableController.getTableMetadata";
-import getObjectFields from "@salesforce/apex/DynamicTableController.getObjectFields";
-import saveMetadata from "@salesforce/apex/DynamicTableController.saveMetadata";
-import deleteTableConfig from "@salesforce/apex/DynamicTableController.deleteTableConfig";
-import cloneTableConfig from "@salesforce/apex/DynamicTableController.cloneTableConfig";
-import saveFeatureOverride from "@salesforce/apex/DynamicTableController.saveFeatureOverride";
-import getFeatureOverrides from "@salesforce/apex/DynamicTableController.getFeatureOverrides";
-import deleteFeatureOverride from "@salesforce/apex/DynamicTableController.deleteFeatureOverride";
-import getImportMetadata from "@salesforce/apex/DynamicTableController.getImportMetadata";
-import getPicklistOptions from "@salesforce/apex/DynamicTableController.getPicklistOptions";
-import searchLookupRecords from "@salesforce/apex/DynamicTableController.searchLookupRecords";
-import getRecordNames from "@salesforce/apex/DynamicTableController.getRecordNames";
+import getAllTables from "@salesforce/apex/SDTConfiguratorController.getAllTables";
+import getTableMetadata from "@salesforce/apex/SDTConfiguratorController.getTableMetadata";
+import getObjectFields from "@salesforce/apex/SDTConfiguratorController.getObjectFields";
+import saveMetadata from "@salesforce/apex/SDTConfiguratorController.saveMetadata";
+import deleteTableConfig from "@salesforce/apex/SDTConfiguratorController.deleteTableConfig";
+import cloneTableConfig from "@salesforce/apex/SDTConfiguratorController.cloneTableConfig";
+import saveFeatureOverride from "@salesforce/apex/SDTConfiguratorController.saveFeatureOverride";
+import getFeatureOverrides from "@salesforce/apex/SDTConfiguratorController.getFeatureOverrides";
+import deleteFeatureOverride from "@salesforce/apex/SDTConfiguratorController.deleteFeatureOverride";
+import getImportMetadata from "@salesforce/apex/SDTConfiguratorController.getImportMetadata";
+import getPicklistOptions from "@salesforce/apex/SDTConfiguratorController.getPicklistOptions";
+import searchLookupRecords from "@salesforce/apex/SDTConfiguratorController.searchLookupRecords";
+import getRecordNames from "@salesforce/apex/SDTConfiguratorController.getRecordNames";
 
 const READ_ONLY_SYSTEM_FIELDS = [
   "id",
