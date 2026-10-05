@@ -29,4 +29,37 @@ private class SimpleTableRecordLinkTest {
         rows = SimpleTableService.mapRecords(new List<SObject>{blank}, new List<SimpleTableDTO.ColumnDef>{lookupColumn}, new Map<String,String>{'AccountId'=>'AccountId'});
         System.assertEquals(0, rows[0].recordLinks.size());
     }
+    @IsTest static void configuredTextColumnUsesExplicitIdPath() {
+        SimpleTableDTO.ColumnDef configured = columnDef('Account.Name', 'Contact');
+        configured.dataType = 'Text';
+        SimpleTableService.applyConfiguredLookupPath(configured, 'Contact', 'Account.Id');
+        System.assertEquals('Account.Id', configured.linkIdPath);
+        System.assertEquals('Account.Name', configured.linkLabelPath);
+        // Explicit target can differ from the inferred display relationship.
+        SimpleTableService.applyConfiguredLookupPath(configured, 'Contact', 'Account.ParentId');
+        System.assertEquals('Account.ParentId', configured.linkIdPath);
+        System.assertEquals('Account.Name', configured.linkLabelPath);
+        SimpleTableService.applyConfiguredLookupPath(configured, 'Contact', '');
+        System.assertEquals('Account.ParentId', configured.linkIdPath);
+        SimpleTableDTO.ColumnDef ownName = columnDef('Name', 'Account');
+        SimpleTableService.applyConfiguredLookupPath(ownName, 'Account', 'ParentId');
+        System.assertEquals('Id', ownName.linkIdPath);
+        for (String invalid : new List<String>{'Account.Name', 'Account.DoesNotExist', 'Account.Id OR Name'}) {
+            Boolean rejected = false;
+            try { SimpleTableService.applyConfiguredLookupPath(configured, 'Contact', invalid); }
+            catch (Exception e) { rejected = true; }
+            System.assert(rejected, invalid);
+        }
+    }
+    @IsTest static void explicitTargetMapsIdAndPreservesDisplay() {
+        Account related = new Account(Id='001000000000001AAA', Name='Acme', ParentId='001000000000002AAA');
+        Contact source = new Contact(Id='003000000000001AAA', AccountId=related.Id);
+        source.putSObject('Account', related);
+        SimpleTableDTO.ColumnDef configured = columnDef('Account.Name', 'Contact');
+        SimpleTableService.applyConfiguredLookupPath(configured, 'Contact', 'Account.ParentId');
+        List<SimpleTableDTO.RowData> rows = SimpleTableService.mapRecords(new List<SObject>{source}, new List<SimpleTableDTO.ColumnDef>{configured}, new Map<String,String>{'Account.Name'=>'Account.Name'});
+        System.assertEquals(String.valueOf(related.ParentId), rows[0].recordLinks.get('Account.Name').recordId);
+        System.assertEquals('Acme', rows[0].recordLinks.get('Account.Name').label);
+        System.assertEquals('Acme', rows[0].fields.get('Account.Name'));
+    }
 }
