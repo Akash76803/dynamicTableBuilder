@@ -16,8 +16,10 @@ This repository contains the source code for a lightweight, server-driven dynami
   - Utilizes `sdtColManager` to adjust the view seamlessly.
 - **Pagination & Limitations:**
   - Integrated server-side limit (`LIMIT 2000`) for robust dataset handling, preventing client-side heap issues with large lists.
-- **Filter Panel UI:**
+- **Filter Panel UI & Multi-Select Picklists:**
   - `sdtFilterPanel` component for an intuitive filtering interface.
+  - Custom `sdtMultiSelect` combobox UI for filtering `Picklist` and `Multipicklist` fields with pill-based tag display.
+  - Cross-object relationship field support (e.g., dynamically fetching picklists for `Account.Industry` from a child object).
 
 ## Architecture & Components
 
@@ -27,6 +29,7 @@ The project is simplified to contain only the essential components required to r
 - **`simpleDataTable`**: The core component that handles the table rendering, debounce search logic, imperative data fetching, and passing data down to subcomponents.
 - **`sdtColManager`**: Handles column visibility and dynamic sorting UI.
 - **`sdtFilterPanel`**: The side-panel/UI dedicated to building complex filter logic to send back to the server.
+- **`sdtMultiSelect`**: A standalone custom dropdown component supporting advanced search, multi-selection, and compact pill UI for Picklist/Multipicklist filters.
 - **`dynamicTableConfigurator`**: Builder/Admin UI to configure the properties of the table and columns dynamically.
 
 ### Apex (Backend)
