@@ -134,18 +134,9 @@ public with sharing class SDTConfiguratorService {
         escapedTerm
       );
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'searchLookupRecords',
-        ex,
-        new Map<String, Object>{
-          'objectApiName' => objectApiName,
-          'searchField' => nameField,
-          'methodName' => 'searchLookupRecords'
-        }
-      );
+      System.debug(LoggingLevel.ERROR, '[SDTConfiguratorService.searchLookupRecords] ' + ex.getMessage() + ' | Stack: ' + ex.getStackTraceString());
       throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + errorRef
+        'An unexpected error occurred while searching records. ' + ex.getMessage()
       );
     }
 
@@ -643,21 +634,9 @@ public with sharing class SDTConfiguratorService {
     } catch (DynamicTableException dex) {
       throw dex;
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'saveMetadata',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'saveMetadata',
-          'operation' => 'save',
-          'tableName' => table != null ? table.Name : 'Unknown',
-          'columnCount' => columns != null ? columns.size() : 0,
-          'actionCount' => actions != null ? actions.size() : 0
-        }
-      );
-
+      System.debug(LoggingLevel.ERROR, '[SDTConfiguratorService.saveMetadata] ' + ex.getMessage() + ' | Stack: ' + ex.getStackTraceString());
       throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + errorRef
+        'An unexpected error occurred while saving table configuration. ' + ex.getMessage()
       );
     }
   }
@@ -708,19 +687,9 @@ public with sharing class SDTConfiguratorService {
     } catch (DynamicTableException dex) {
       throw dex;
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'cloneTableConfig',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'cloneTableConfig',
-          'operation' => 'clone',
-          'tableId' => tableId
-        }
-      );
-
+      System.debug(LoggingLevel.ERROR, '[SDTConfiguratorService.cloneTableConfig] ' + ex.getMessage() + ' | Stack: ' + ex.getStackTraceString());
       throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + errorRef
+        'An unexpected error occurred while cloning table configuration. ' + ex.getMessage()
       );
     }
   }
