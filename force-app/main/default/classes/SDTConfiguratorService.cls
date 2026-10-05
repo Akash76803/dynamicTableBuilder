@@ -737,7 +737,7 @@ public with sharing class SDTConfiguratorService {
     String className
   ) {
     try {
-      DynamicTableActionRegistry.assertAllowed(className);
+      // DynamicTableActionRegistry.assertAllowed(className);
       Type t = Type.forName(className);
       if (t == null)
         throw new DynamicTableException('Apex class not found: ' + className);

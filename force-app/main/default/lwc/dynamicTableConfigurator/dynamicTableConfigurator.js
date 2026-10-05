@@ -36,8 +36,8 @@ const addNamespace = (obj) => {
   if (!obj) return obj;
   const newObj = { ...obj };
   Object.keys(obj).forEach((key) => {
-    if (key.endsWith("__c") && !key.startsWith("Shree_Tech__")) {
-      newObj[`Shree_Tech__${key}`] = obj[key];
+    if (key.endsWith("__c") && !key.startsWith("")) {
+      newObj[`${key}`] = obj[key];
       delete newObj[key];
     }
   });
@@ -48,8 +48,8 @@ const stripNamespace = (obj) => {
   if (!obj) return obj;
   const newObj = { ...obj };
   Object.keys(obj).forEach((key) => {
-    if (key.startsWith("Shree_Tech__")) {
-      newObj[key.replace("Shree_Tech__", "")] = obj[key];
+    if (key.startsWith("")) {
+      newObj[key.replace("", "")] = obj[key];
     }
   });
   return newObj;
@@ -881,7 +881,7 @@ export default class DynamicTableConfigurator extends LightningElement {
           Index__c: index,
           Filter_Type__c,
           Default_Filter_Value__c,
-          sobjectType: 'Shree_Tech__Table_Columns__c'
+          sobjectType: 'Table_Columns__c'
         });
       });
 
@@ -890,14 +890,14 @@ export default class DynamicTableConfigurator extends LightningElement {
         return addNamespace({ 
           ...rest, 
           Display_Order__c: index + 1,
-          sobjectType: 'Shree_Tech__Table_Action__c'
+          sobjectType: 'Table_Action__c'
         });
       });
 
       await saveMetadata({
         table: addNamespace({
           ...this.activeTable,
-          sobjectType: 'Shree_Tech__Table__c'
+          sobjectType: 'Table__c'
         }),
         columns: columnsToSave,
         actions: actionsToSave,
@@ -1668,7 +1668,7 @@ export default class DynamicTableConfigurator extends LightningElement {
       const tfo = { 
         ...this.newOverride, 
         Table__c: this.activeTable.Id,
-        sobjectType: 'Shree_Tech__Table_Feature_Override__c'
+        sobjectType: 'Table_Feature_Override__c'
       };
       await saveFeatureOverride({ featureOverride: addNamespace(tfo) });
       this.showToast("Success", "Override saved successfully.", "success");

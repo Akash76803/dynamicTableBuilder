@@ -13,7 +13,7 @@ public with sharing class SDTConfiguratorController {
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
+        ex.getMessage()
       );
     }
   }
@@ -42,7 +42,7 @@ public with sharing class SDTConfiguratorController {
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
+        ex.getMessage()
       );
     }
   }
@@ -95,7 +95,7 @@ public with sharing class SDTConfiguratorController {
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
+        ex.getMessage()
       );
     }
   }
@@ -125,7 +125,7 @@ public with sharing class SDTConfiguratorController {
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
+        ex.getMessage()
       );
     }
   }
@@ -150,7 +150,7 @@ public with sharing class SDTConfiguratorController {
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
+        ex.getMessage()
       );
     }
   }
@@ -168,7 +168,7 @@ public with sharing class SDTConfiguratorController {
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
+        ex.getMessage()
       );
     }
   }
@@ -250,7 +250,7 @@ public with sharing class SDTConfiguratorController {
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
+        ex.getMessage()
       );
     }
   }
@@ -297,7 +297,7 @@ public with sharing class SDTConfiguratorController {
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
+        ex.getMessage()
       );
     }
   }
