@@ -1,345 +1,16 @@
-// [EXPORT FIX] - 2026-06-07 - Merge exportGetData and exportSaveFile into exportAndSaveFile, add duplicate job guard
-/**
- * DynamicTableController
- * ─────────────────────────────────────────────────────────────────────────────
- * Controller layer — thin AuraEnabled entry points ONLY.
- * No business logic, no SOQL, no data mapping.
- * Every method validates surface-level inputs then delegates to the Service.
- *
- * Layer:  Controller (AuraEnabled)
- * Calls:  DynamicTableService
- * Called by: LWC via @wire / imperative Apex
- */
 public with sharing class SDTConfiguratorController {
-  /**
-   * Returns column configs + flattened row data for the given table config.
-   *
-   * Used as @wire in LWC (cacheable=true).
-   *
-   * @param tableName   Name field on Table__c — which config to load
-   * @param parentId    Optional record Id from the host record page.
-   *                    When provided, the query is filtered to child records
-   *                    of that parent via the matching lookup field.
-   *                    Pass null or empty string for standalone / list views.
-   */
-  @AuraEnabled(cacheable=true)
-  public static Integer getAsyncRecordCount(
-    String tableName,
-    String parentId,
-    String filtersJson,
-    String searchTerm
-  ) {
-    try {
-      return DynamicTablePaginationService.getAsyncRecordCount(
-        tableName,
-        parentId,
-        filtersJson,
-        searchTerm
-      );
-    } catch (AuraHandledException ahe) {
-      throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
-      throw new AuraHandledException(dex.getMessage());
-    } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
-        'getAsyncRecordCount',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'getAsyncRecordCount',
-          'operation' => 'controllerFallback',
-          'tableName' => tableName,
-          'parentId' => parentId
-        }
-      );
 
-      throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
-      );
-    }
-  }
-
-  /**
-   * Searches records of a given object for use in editable lookup dropdowns.
-   *
-   * NOT cacheable — results change with every user keystroke.
-   *
-   * @param objectApiName   Object to search e.g. Contact, Account, My_Custom__c
-   * @param searchTerm      Text the user typed — min 2 chars enforced in LWC
-   * @param nameField       Field to search and display — defaults to Name
-   */
-  @AuraEnabled
-  public static List<DynamicTableDTO.LookupSearchResult> searchLookupRecords(
-    String objectApiName,
-    String searchTerm,
-    String nameField
-  ) {
-    try {
-      System.debug(
-        LoggingLevel.FINE,
-        '[Controller] searchLookupRecords → object'
-      );
-      return DynamicTableService.searchLookupRecords(
-        objectApiName,
-        searchTerm,
-        nameField
-      );
-    } catch (AuraHandledException ahe) {
-      throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
-      throw new AuraHandledException(dex.getMessage());
-    } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
-        'searchLookupRecords',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'searchLookupRecords',
-          'operation' => 'controllerFallback',
-          'objectApiName' => objectApiName
-        }
-      );
-
-      throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
-      );
-    }
-  }
-
-  /**
-   * Saves edited rows back to Salesforce.
-   * NOT cacheable — performs DML.
-   *
-   * @param tableName   Same tableName used to load the table (resolves col keys)
-   * @param recordsJson JSON array of { recordId, fields: { colKey: value } }
-   */
-  @AuraEnabled
-  public static DynamicTableDTO.SaveResult saveTableData(
-    String tableName,
-    String recordsJson
-  ) {
-    try {
-      System.debug(LoggingLevel.FINE, '[Controller] saveTableData → tableName');
-      System.debug(
-        LoggingLevel.INFO,
-        '[Controller] saveTableData request received.'
-      );
-      return DynamicTableService.saveTableData(tableName, recordsJson);
-    } catch (DynamicTableService.DynamicTableException ex) {
-      throw new AuraHandledException(
-        'An internal server error occurred. Please contact support.'
-      );
-    } catch (Exception ex) {
-      System.debug(
-        LoggingLevel.FINE,
-        '[Controller] saveTableData unexpected error'
-      );
-      throw new AuraHandledException(
-        'An unexpected error occurred while saving. Please contact your administrator.'
-      );
-    }
-  }
-
-  /**
-   * Returns column configs + filtered row data for the given table config.
-   *
-   * NOT cacheable — filter results change per user interaction.
-   *
-   * @param tableName     Name field on Table__c — which config to load
-   * @param parentId      Optional parent record Id (same as getTableData)
-   * @param filtersJson   JSON-serialised DynamicTableDTO.FilterPayload
-   *                      { logic: 'AND'|'OR', filters: [ FilterCriteria… ] }
-   *                      Pass null or '' to return all records (respects parentId filter only)
-   */
-  @AuraEnabled
-  public static DynamicTableDTO.TableResult getFilteredTableData(
-    String tableName,
-    String parentId,
-    String filtersJson
-  ) {
-    try {
-      System.debug(
-        LoggingLevel.FINE,
-        '[Controller] getFilteredTableData → tableName'
-      );
-
-      return DynamicTableService.getFilteredTableData(
-        tableName,
-        parentId,
-        filtersJson
-      );
-    } catch (DynamicTableService.DynamicTableException ex) {
-      throw new AuraHandledException(
-        'An internal server error occurred. Please contact support.'
-      );
-    } catch (Exception ex) {
-      System.debug(
-        LoggingLevel.FINE,
-        '[Controller] getFilteredTableData unexpected error'
-      );
-      throw new AuraHandledException(
-        'An unexpected error occurred loading filtered data. ' +
-        'Please contact your administrator.'
-      );
-    }
-  }
-
-  /**
-   * Retrieves the exact database record count for the given table/filters.
-   * Used for export routing and accurate metrics without hitting heap limits.
-   */
-  @AuraEnabled
-  public static Integer getRecordCount(
-    String tableName,
-    String parentId,
-    String filtersJson
-  ) {
-    try {
-      return DynamicTableService.getRecordCount(
-        tableName,
-        parentId,
-        filtersJson
-      );
-    } catch (DynamicTableService.DynamicTableException ex) {
-      throw new AuraHandledException(
-        'An internal server error occurred. Please contact support.'
-      );
-    } catch (Exception ex) {
-      System.debug(
-        LoggingLevel.FINE,
-        '[Controller] getRecordCount unexpected error'
-      );
-      throw new AuraHandledException('Failed to retrieve record count.');
-    }
-  }
-
-  @AuraEnabled
-  public static Map<String, Decimal> getGrandTotals(
-    String tableName,
-    String parentId,
-    String filtersJson,
-    String searchTerm
-  ) {
-    try {
-      return DynamicTableService.getGrandTotals(
-        tableName,
-        parentId,
-        filtersJson,
-        searchTerm
-      );
-    } catch (DynamicTableService.DynamicTableException ex) {
-      throw new AuraHandledException(
-        'An internal server error occurred. Please contact support.'
-      );
-    } catch (Exception ex) {
-      System.debug(
-        LoggingLevel.FINE,
-        '[Controller] getGrandTotals unexpected error'
-      );
-      throw new AuraHandledException('Failed to retrieve grand totals.');
-    }
-  }
-
-  /**
-   * Enqueues an async Batch Apex job to export table data as CSV
-   * via ContentVersion chunks.
-   *
-   * @param tableName    Table config name
-   * @param parentId     Optional parent record Id
-   * @param filtersJson  Optional filter payload JSON
-   * @param columnKeysJson Optional JSON array of visible column keys in UI order
-   * @return String      The Batch Job ID for tracking
-   */
-  @AuraEnabled
-  public static String exportTableViaEmail(
-    String tableName,
-    String parentId,
-    String filtersJson,
-    String matrixParamsJson,
-    String searchTerm,
-    String columnKeysJson
-  ) {
-    try {
-      ExportOrchestrator.AsyncResult asyncResult = ExportOrchestrator.runAsync(
-        tableName,
-        parentId,
-        filtersJson,
-        matrixParamsJson,
-        searchTerm,
-        columnKeysJson
-      );
-      return asyncResult.jobId;
-    } catch (ExportErrors.ExportException ex) {
-      throw new AuraHandledException(ex.userMessage);
-    } catch (AuraHandledException ahe) {
-      throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
-      throw new AuraHandledException(dex.getMessage());
-    } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
-        'exportTableViaEmail',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'exportTableViaEmail',
-          'operation' => 'controllerFallback',
-          'tableName' => tableName,
-          'parentId' => parentId,
-          'hasFilters' => String.isNotBlank(filtersJson)
-        }
-      );
-
-      throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
-      );
-    }
-  }
-
-  /**
-   * Logs a client-side export for audit tracking.
-   */
-  @AuraEnabled
-  public static void logClientExport(
-    String tableName,
-    Integer recordCount,
-    Boolean isMatrixMode
-  ) {
-    try {
-      Table_Export_Log__c log = new Table_Export_Log__c(
-        User__c = UserInfo.getUserId(),
-        Table_Name__c = tableName,
-        Record_Count__c = recordCount,
-        Export_Type__c = isMatrixMode ? 'Matrix' : 'Client',
-        Status__c = 'Completed',
-        Progress_Percentage__c = 100,
-        Started_Time__c = Datetime.now(),
-        Completed_Time__c = Datetime.now()
-      );
-      insert log;
-    } catch (Exception ex) {
-      System.debug(LoggingLevel.FINE, '[Controller] logClientExport error');
-    }
-  }
-
-  // ── Table Configuration Management ────────────────────────────────────────
-
-  /**
-   * Returns all configured tables for the dashboard.
-   */
-  @AuraEnabled(cacheable=true)
+@AuraEnabled(cacheable=true)
   public static List<Table__c> getAllTables() {
     try {
-      return DynamicTableSelector.getAllTables();
+      return SDTConfiguratorSelector.getAllTables();
     } catch (AuraHandledException ahe) {
       throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
+    } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
       String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
+        'SDTConfiguratorController',
         'getAllTables',
         ex,
         new Map<String, Object>{
@@ -355,14 +26,14 @@ public with sharing class SDTConfiguratorController {
     }
   }
 
-  @AuraEnabled
+@AuraEnabled
   public static Map<String, Object> getTableMetadata(Id tableId) {
     try {
-      Table__c table = DynamicTableSelector.getTableById(tableId);
-      List<Table_Columns__c> columns = DynamicTableSelector.getColumnsByTableId(
+      Table__c table = SDTConfiguratorSelector.getTableById(tableId);
+      List<Table_Columns__c> columns = SDTConfiguratorSelector.getColumnsByTableId(
         tableId
       );
-      List<Table_Action__c> actions = DynamicTableSelector.getActionsByTableId(
+      List<Table_Action__c> actions = SDTConfiguratorSelector.getActionsByTableId(
         tableId
       );
       return new Map<String, Object>{
@@ -372,11 +43,11 @@ public with sharing class SDTConfiguratorController {
       };
     } catch (AuraHandledException ahe) {
       throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
+    } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
       String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
+        'SDTConfiguratorController',
         'getTableMetadata',
         ex,
         new Map<String, Object>{
@@ -393,230 +64,17 @@ public with sharing class SDTConfiguratorController {
     }
   }
 
-  /**
-   * Saves the entire table configuration.
-   */
-  @AuraEnabled
-  public static void saveMetadata(
-    Table__c table,
-    List<Table_Columns__c> columns,
-    List<Table_Action__c> actions,
-    List<String> deletedIds,
-    List<String> deletedActionIds
-  ) {
-    try {
-      DynamicTableService.saveMetadata(
-        table,
-        columns,
-        actions,
-        deletedIds,
-        deletedActionIds
-      );
-    } catch (AuraHandledException ahe) {
-      throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
-      throw new AuraHandledException(dex.getMessage());
-    } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
-        'saveMetadata',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'saveMetadata',
-          'operation' => 'controllerFallback'
-        }
-      );
-
-      throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
-      );
-    }
-  }
-
-  @AuraEnabled
-  public static DynamicTableDTO.ImportResult importTableData(
-    String tableName,
-    String dataMappingJson,
-    String csvDataJson,
-    String parentId,
-    String operation,
-    String upsertKey
-  ) {
-    try {
-      System.debug(
-        LoggingLevel.FINE,
-        '[Controller] importTableData → tableName'
-      );
-      return DynamicTableImportService.importData(
-        tableName,
-        dataMappingJson,
-        csvDataJson,
-        parentId,
-        operation,
-        upsertKey
-      );
-    } catch (AuraHandledException ahe) {
-      throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
-      throw new AuraHandledException(dex.getMessage());
-    } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
-        'importTableData',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'importTableData',
-          'operation' => 'controllerFallback',
-          'tableName' => tableName,
-          'parentId' => parentId,
-          'hasPayload' => String.isNotBlank(csvDataJson)
-        }
-      );
-
-      throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
-      );
-    }
-  }
-
-  @AuraEnabled
-  public static DynamicTableDTO.ImportMetadata getImportMetadata(
-    String tableName
-  ) {
-    try {
-      System.debug(
-        LoggingLevel.FINE,
-        '[Controller] getImportMetadata → tableName'
-      );
-      return DynamicTableService.getImportMetadata(tableName);
-    } catch (AuraHandledException ahe) {
-      throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
-      throw new AuraHandledException(dex.getMessage());
-    } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
-        'getImportMetadata',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'getImportMetadata',
-          'operation' => 'controllerFallback',
-          'tableName' => tableName
-        }
-      );
-
-      throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
-      );
-    }
-  }
-  /**
-   * Executes a configurable Apex action for a set of records.
-   *
-   * @param actionId   The ID of the Table_Action__c record.
-   * @param recordIds  IDs of the records selected in the UI.
-   */
-  @AuraEnabled
-  public static DynamicTableDTO.ActionResponse executeTableAction(
-    String actionId,
-    List<Id> recordIds
-  ) {
-    try {
-      return DynamicTableService.executeTableAction(actionId, recordIds);
-    } catch (Exception ex) {
-      throw new AuraHandledException(
-        'An internal server error occurred. Please contact support.'
-      );
-    }
-  }
-
-  /**
-   * Clones a Table__c record and its related configurations.
-   */
-  @AuraEnabled
-  public static void cloneTableConfig(Id tableId) {
-    try {
-      DynamicTableService.cloneTableConfig(tableId);
-    } catch (AuraHandledException ahe) {
-      throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
-      throw new AuraHandledException(dex.getMessage());
-    } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
-        'cloneTableConfig',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'cloneTableConfig',
-          'operation' => 'controllerFallback',
-          'tableId' => tableId
-        }
-      );
-
-      throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
-      );
-    }
-  }
-
-  /**
-   * Deletes a Table__c record and all its child Table_Columns__c via cascade.
-   *
-   * @param tableId  ID of the Table__c record to delete.
-   */
-  @AuraEnabled
-  public static void deleteTableConfig(Id tableId) {
-    try {
-      Table__c tbl = [
-        SELECT Id
-        FROM Table__c
-        WHERE Id = :tableId
-        WITH USER_MODE
-        LIMIT 1
-      ];
-      delete as user tbl;
-    } catch (AuraHandledException ahe) {
-      throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
-      throw new AuraHandledException(dex.getMessage());
-    } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
-        'deleteTableConfig',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'deleteTableConfig',
-          'operation' => 'controllerFallback',
-          'tableId' => tableId
-        }
-      );
-
-      throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
-        errorRef
-      );
-    }
-  }
-
-  /**
-   * Returns a list of fields for a given object API name.
-   * Used in configurator for lookup fields to show parent object fields.
-   */
-  @AuraEnabled(cacheable=true)
+@AuraEnabled(cacheable=true)
   public static List<Map<String, String>> getObjectFields(
     String objectApiName
   ) {
     try {
       List<Map<String, String>> fieldOptions = new List<Map<String, String>>();
-      SObjectType sObjType = DynamicTableService.getSObjectType(objectApiName);
+      SObjectType sObjType = SDTConfiguratorService.getSObjectType(objectApiName);
       if (sObjType != null) {
         if (!sObjType.getDescribe().isAccessible())
           throw new AuraHandledException('Object is not accessible.');
-        Map<String, Schema.SObjectField> fieldMap = DynamicTableService.getFieldMap(
+        Map<String, Schema.SObjectField> fieldMap = SDTConfiguratorService.getFieldMap(
           objectApiName
         );
         for (String fieldName : fieldMap.keySet()) {
@@ -647,11 +105,11 @@ public with sharing class SDTConfiguratorController {
       return fieldOptions;
     } catch (AuraHandledException ahe) {
       throw ahe;
-    } catch (DynamicTableService.DynamicTableException dex) {
+    } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
       String errorRef = DynamicTableErrorLogger.logException(
-        'DynamicTableController',
+        'SDTConfiguratorController',
         'getObjectFields',
         ex,
         new Map<String, Object>{
@@ -668,7 +126,119 @@ public with sharing class SDTConfiguratorController {
     }
   }
 
-  @AuraEnabled
+@AuraEnabled
+  public static void saveMetadata(
+    Table__c table,
+    List<Table_Columns__c> columns,
+    List<Table_Action__c> actions,
+    List<String> deletedIds,
+    List<String> deletedActionIds
+  ) {
+    try {
+      SDTConfiguratorService.saveMetadata(
+        table,
+        columns,
+        actions,
+        deletedIds,
+        deletedActionIds
+      );
+    } catch (AuraHandledException ahe) {
+      throw ahe;
+    } catch (SDTConfiguratorService.DynamicTableException dex) {
+      throw new AuraHandledException(dex.getMessage());
+    } catch (Exception ex) {
+      String errorRef = DynamicTableErrorLogger.logException(
+        'SDTConfiguratorController',
+        'saveMetadata',
+        ex,
+        new Map<String, Object>{
+          'methodName' => 'saveMetadata',
+          'operation' => 'controllerFallback'
+        }
+      );
+
+      throw new AuraHandledException(
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
+        errorRef
+      );
+    }
+  }
+
+@AuraEnabled
+  public static void deleteTableConfig(Id tableId) {
+    try {
+      Table__c tbl = [
+        SELECT Id
+        FROM Table__c
+        WHERE Id = :tableId
+        WITH USER_MODE
+        LIMIT 1
+      ];
+      delete as user tbl;
+    } catch (AuraHandledException ahe) {
+      throw ahe;
+    } catch (SDTConfiguratorService.DynamicTableException dex) {
+      throw new AuraHandledException(dex.getMessage());
+    } catch (Exception ex) {
+      String errorRef = DynamicTableErrorLogger.logException(
+        'SDTConfiguratorController',
+        'deleteTableConfig',
+        ex,
+        new Map<String, Object>{
+          'methodName' => 'deleteTableConfig',
+          'operation' => 'controllerFallback',
+          'tableId' => tableId
+        }
+      );
+
+      throw new AuraHandledException(
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
+        errorRef
+      );
+    }
+  }
+
+@AuraEnabled
+  public static void cloneTableConfig(Id tableId) {
+    try {
+      SDTConfiguratorService.cloneTableConfig(tableId);
+    } catch (AuraHandledException ahe) {
+      throw ahe;
+    } catch (SDTConfiguratorService.DynamicTableException dex) {
+      throw new AuraHandledException(dex.getMessage());
+    } catch (Exception ex) {
+      String errorRef = DynamicTableErrorLogger.logException(
+        'SDTConfiguratorController',
+        'cloneTableConfig',
+        ex,
+        new Map<String, Object>{
+          'methodName' => 'cloneTableConfig',
+          'operation' => 'controllerFallback',
+          'tableId' => tableId
+        }
+      );
+
+      throw new AuraHandledException(
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
+        errorRef
+      );
+    }
+  }
+
+@AuraEnabled
+  public static void saveFeatureOverride(
+    Table_Feature_Override__c featureOverride
+  ) {
+    try {
+      upsert as user featureOverride;
+    } catch (Exception e) {
+      throw new AuraHandledException(
+        'An internal server error occurred. Please contact support.'
+      );
+    }
+  }
+
+@AuraEnabled
   public static List<Table_Feature_Override__c> getFeatureOverrides(
     Id tableId
   ) {
@@ -697,20 +267,7 @@ public with sharing class SDTConfiguratorController {
     }
   }
 
-  @AuraEnabled
-  public static void saveFeatureOverride(
-    Table_Feature_Override__c featureOverride
-  ) {
-    try {
-      upsert as user featureOverride;
-    } catch (Exception e) {
-      throw new AuraHandledException(
-        'An internal server error occurred. Please contact support.'
-      );
-    }
-  }
-
-  @AuraEnabled
+@AuraEnabled
   public static void deleteFeatureOverride(Id overrideId) {
     try {
       delete as user [
@@ -726,110 +283,46 @@ public with sharing class SDTConfiguratorController {
     }
   }
 
-  // -----------------------------------------------------------------
-  // exportAndSaveFile
-  // -----------------------------------------------------------------
-  @AuraEnabled(cacheable=true)
-  public static DynamicTableDTO.MatrixResult getMatrixData(
-    Id tableId,
-    String parentId,
-    String matrixConfigJson
+@AuraEnabled
+  public static SDTConfiguratorDTO.ImportMetadata getImportMetadata(
+    String tableName
   ) {
     try {
-      return MatrixOrchestrator.getSyncMatrixData(
-        tableId,
-        parentId,
-        matrixConfigJson
+      System.debug(
+        LoggingLevel.FINE,
+        '[Controller] getImportMetadata → tableName'
       );
+      return SDTConfiguratorService.getImportMetadata(tableName);
     } catch (AuraHandledException ahe) {
       throw ahe;
-    } catch (MatrixProcessingException mpe) {
-      AuraHandledException ahe = new AuraHandledException(mpe.getMessage());
-      ahe.setMessage(mpe.getMessage());
-      throw ahe;
-    } catch (DynamicTableService.MatrixQueryException mqe) {
-      AuraHandledException ahe = new AuraHandledException(mqe.getMessage());
-      ahe.setMessage(mqe.getMessage());
-      throw ahe;
-    } catch (Exception e) {
-      System.debug(LoggingLevel.FINE, 'getMatrixData error');
-      String msg = 'Matrix data load failed: ' + e.getMessage();
-      AuraHandledException ahe = new AuraHandledException(msg);
-      ahe.setMessage(msg);
-      throw ahe;
-    }
-  }
-
-  @AuraEnabled
-  public static DynamicTableDTO.MatrixResponse requestMatrixData(
-    Id tableId,
-    String parentId,
-    String matrixConfigJson
-  ) {
-    try {
-      return MatrixOrchestrator.requestMatrixData(
-        tableId,
-        parentId,
-        matrixConfigJson
+    } catch (SDTConfiguratorService.DynamicTableException dex) {
+      throw new AuraHandledException(dex.getMessage());
+    } catch (Exception ex) {
+      String errorRef = DynamicTableErrorLogger.logException(
+        'SDTConfiguratorController',
+        'getImportMetadata',
+        ex,
+        new Map<String, Object>{
+          'methodName' => 'getImportMetadata',
+          'operation' => 'controllerFallback',
+          'tableName' => tableName
+        }
       );
-    } catch (AuraHandledException ahe) {
-      throw ahe;
-    } catch (MatrixProcessingException mpe) {
-      AuraHandledException ahe = new AuraHandledException(mpe.getMessage());
-      ahe.setMessage(mpe.getMessage());
-      throw ahe;
-    } catch (Exception ex) {
-      String msg = 'Matrix request failed: ' + ex.getMessage();
-      AuraHandledException ahe = new AuraHandledException(msg);
-      ahe.setMessage(msg);
-      throw ahe;
-    }
-  }
 
-  @AuraEnabled
-  public static DynamicTableDTO.MatrixJobStatus getMatrixJobStatus(
-    String jobId
-  ) {
-    try {
-      return MatrixCacheService.getJobStatus(jobId);
-    } catch (MatrixProcessingException mpe) {
-      throw new AuraHandledException(mpe.getMessage());
-    }
-  }
-
-  @AuraEnabled(cacheable=true)
-  public static DynamicTableDTO.MatrixResult getMatrixJobResult(String jobId) {
-    try {
-      return MatrixCacheService.getJobResult(jobId);
-    } catch (MatrixProcessingException mpe) {
-      throw new AuraHandledException(mpe.getMessage());
-    }
-  }
-
-  @AuraEnabled
-  public static DynamicTableDTO.BrowserDownloadResult exportMatrixJobCsv(
-    String jobId
-  ) {
-    try {
-      return MatrixBrowserExportService.exportJobCsv(jobId);
-    } catch (AuraHandledException ahe) {
-      throw ahe;
-    } catch (MatrixProcessingException mpe) {
-      throw new AuraHandledException(mpe.getMessage());
-    } catch (Exception ex) {
       throw new AuraHandledException(
-        'Matrix export failed: ' + ex.getMessage()
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
+        errorRef
       );
     }
   }
 
-  @AuraEnabled(cacheable=true)
+@AuraEnabled(cacheable=true)
   public static List<Map<String, String>> getPicklistOptions(
     String objectApiName,
     String fieldApiName
   ) {
     try {
-      return DynamicTableService.resolvePicklistValues(
+      return SDTConfiguratorService.resolvePicklistValues(
         objectApiName,
         fieldApiName
       );
@@ -840,11 +333,46 @@ public with sharing class SDTConfiguratorController {
     }
   }
 
-  /**
-   * Dynamically queries and returns a map of ID to Name field for any Salesforce SObject.
-   * Used to resolve lookup filter value record IDs into readable labels on load.
-   */
-  @AuraEnabled(cacheable=true)
+@AuraEnabled
+  public static List<SDTConfiguratorDTO.LookupSearchResult> searchLookupRecords(
+    String objectApiName,
+    String searchTerm,
+    String nameField
+  ) {
+    try {
+      System.debug(
+        LoggingLevel.FINE,
+        '[Controller] searchLookupRecords → object'
+      );
+      return SDTConfiguratorService.searchLookupRecords(
+        objectApiName,
+        searchTerm,
+        nameField
+      );
+    } catch (AuraHandledException ahe) {
+      throw ahe;
+    } catch (SDTConfiguratorService.DynamicTableException dex) {
+      throw new AuraHandledException(dex.getMessage());
+    } catch (Exception ex) {
+      String errorRef = DynamicTableErrorLogger.logException(
+        'SDTConfiguratorController',
+        'searchLookupRecords',
+        ex,
+        new Map<String, Object>{
+          'methodName' => 'searchLookupRecords',
+          'operation' => 'controllerFallback',
+          'objectApiName' => objectApiName
+        }
+      );
+
+      throw new AuraHandledException(
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
+        errorRef
+      );
+    }
+  }
+
+@AuraEnabled(cacheable=true)
   public static Map<String, String> getRecordNames(List<Id> recordIds) {
     Map<String, String> idToNameMap = new Map<String, String>();
     if (recordIds == null || recordIds.isEmpty()) {
@@ -910,216 +438,4 @@ public with sharing class SDTConfiguratorController {
     return idToNameMap;
   }
 
-  /**
-   * Retrieves all saved views for a given table name, belonging to the current user.
-   */
-  @AuraEnabled
-  public static List<DynamicTableDTO.UserViewDTO> getUserViews(
-    String tableName
-  ) {
-    try {
-      List<Table_User_View__c> views = DynamicTableSelector.getUserViewsByTableName(
-        tableName
-      );
-      List<DynamicTableDTO.UserViewDTO> dtos = new List<DynamicTableDTO.UserViewDTO>();
-      for (Table_User_View__c view : views) {
-        DynamicTableDTO.UserViewDTO dto = new DynamicTableDTO.UserViewDTO();
-        dto.id = view.Id;
-        dto.name = view.Name;
-        dto.filterPayloadJson = view.Filter_Payload_JSON__c;
-        dto.columnStateJson = view.Column_State_JSON__c;
-        dto.matrixConfigJson = view.Matrix_Config_JSON__c;
-        dto.sortKey = view.Sort_Key__c;
-        dto.sortDirection = view.Sort_Direction__c;
-        dto.isDefault = view.Is_Default__c;
-        dto.description = view.Description__c;
-        dtos.add(dto);
-      }
-      return dtos;
-    } catch (Exception ex) {
-      throw new AuraHandledException(
-        'Failed to load user views: ' + ex.getMessage()
-      );
-    }
-  }
-
-  /**
-   * Saves a user view. If isDefault is true, all other user views for this table name are unmarked as default.
-   */
-  @AuraEnabled
-  public static DynamicTableDTO.UserViewDTO saveUserView(
-    String tableName,
-    String viewName,
-    String filterPayloadJson,
-    String columnStateJson,
-    String matrixConfigJson,
-    String sortKey,
-    String sortDir,
-    Boolean isDefault,
-    String description
-  ) {
-    try {
-      if (String.isBlank(tableName)) {
-        throw new AuraHandledException('Table name is required.');
-      }
-      if (String.isBlank(viewName)) {
-        throw new AuraHandledException('View name is required.');
-      }
-
-      // If isDefault is true, uncheck Is_Default__c on all existing views for this table name
-      if (isDefault == true) {
-        List<Table_User_View__c> existingViews = DynamicTableSelector.getUserViewsByTableName(
-          tableName
-        );
-        List<Table_User_View__c> updates = new List<Table_User_View__c>();
-        for (Table_User_View__c ev : existingViews) {
-          if (ev.Is_Default__c == true) {
-            ev.Is_Default__c = false;
-            updates.add(ev);
-          }
-        }
-        if (!updates.isEmpty()) {
-          update updates;
-        }
-      }
-
-      Table_User_View__c newView = new Table_User_View__c(
-        Name = viewName.trim(),
-        Table_Name__c = tableName.trim(),
-        Filter_Payload_JSON__c = filterPayloadJson,
-        Column_State_JSON__c = columnStateJson,
-        Matrix_Config_JSON__c = matrixConfigJson,
-        Sort_Key__c = sortKey,
-        Sort_Direction__c = sortDir,
-        Is_Default__c = (isDefault == true),
-        Description__c = description
-      );
-
-      insert newView;
-
-      DynamicTableDTO.UserViewDTO dto = new DynamicTableDTO.UserViewDTO();
-      dto.id = newView.Id;
-      dto.name = newView.Name;
-      dto.filterPayloadJson = newView.Filter_Payload_JSON__c;
-      dto.columnStateJson = newView.Column_State_JSON__c;
-      dto.matrixConfigJson = newView.Matrix_Config_JSON__c;
-      dto.sortKey = newView.Sort_Key__c;
-      dto.sortDirection = newView.Sort_Direction__c;
-      dto.isDefault = newView.Is_Default__c;
-      dto.description = newView.Description__c;
-      return dto;
-    } catch (Exception ex) {
-      throw new AuraHandledException(
-        'Failed to save user view: ' + ex.getMessage()
-      );
-    }
-  }
-
-  /**
-   * Updates an existing user view with the current table state.
-   */
-  @AuraEnabled
-  public static DynamicTableDTO.UserViewDTO updateUserView(
-    Id viewId,
-    String tableName,
-    String viewName,
-    String filterPayloadJson,
-    String columnStateJson,
-    String matrixConfigJson,
-    String sortKey,
-    String sortDir,
-    Boolean isDefault,
-    String description
-  ) {
-    try {
-      if (viewId == null) {
-        throw new AuraHandledException('View Id is required.');
-      }
-      if (String.isBlank(tableName)) {
-        throw new AuraHandledException('Table name is required.');
-      }
-      if (String.isBlank(viewName)) {
-        throw new AuraHandledException('View name is required.');
-      }
-
-      Table_User_View__c view = DynamicTableSelector.getUserViewById(viewId);
-      if (view == null) {
-        throw new AuraHandledException('View not found.');
-      }
-      if (view.OwnerId != UserInfo.getUserId()) {
-        throw new AuraHandledException(
-          'You do not have permission to update this view.'
-        );
-      }
-
-      if (isDefault == true) {
-        List<Table_User_View__c> existingViews = DynamicTableSelector.getUserViewsByTableName(
-          tableName
-        );
-        List<Table_User_View__c> updates = new List<Table_User_View__c>();
-        for (Table_User_View__c ev : existingViews) {
-          if (ev.Id != viewId && ev.Is_Default__c == true) {
-            ev.Is_Default__c = false;
-            updates.add(ev);
-          }
-        }
-        if (!updates.isEmpty()) {
-          update updates;
-        }
-      }
-
-      view.Name = viewName.trim();
-      view.Table_Name__c = tableName.trim();
-      view.Filter_Payload_JSON__c = filterPayloadJson;
-      view.Column_State_JSON__c = columnStateJson;
-      view.Matrix_Config_JSON__c = matrixConfigJson;
-      view.Sort_Key__c = sortKey;
-      view.Sort_Direction__c = sortDir;
-      view.Is_Default__c = (isDefault == true);
-      view.Description__c = description;
-      update view;
-
-      DynamicTableDTO.UserViewDTO dto = new DynamicTableDTO.UserViewDTO();
-      dto.id = view.Id;
-      dto.name = view.Name;
-      dto.filterPayloadJson = view.Filter_Payload_JSON__c;
-      dto.columnStateJson = view.Column_State_JSON__c;
-      dto.matrixConfigJson = view.Matrix_Config_JSON__c;
-      dto.sortKey = view.Sort_Key__c;
-      dto.sortDirection = view.Sort_Direction__c;
-      dto.isDefault = view.Is_Default__c;
-      dto.description = view.Description__c;
-      return dto;
-    } catch (Exception ex) {
-      throw new AuraHandledException(
-        'Failed to update user view: ' + ex.getMessage()
-      );
-    }
-  }
-
-  /**
-   * Deletes a user view.
-   */
-  @AuraEnabled
-  public static void deleteUserView(Id viewId) {
-    try {
-      if (viewId == null) {
-        throw new AuraHandledException('View Id is required.');
-      }
-      Table_User_View__c view = DynamicTableSelector.getUserViewById(viewId);
-      if (view == null) {
-        throw new AuraHandledException('View not found.');
-      }
-      if (view.OwnerId != UserInfo.getUserId()) {
-        throw new AuraHandledException(
-          'You do not have permission to delete this view.'
-        );
-      }
-      delete view;
-    } catch (Exception ex) {
-      throw new AuraHandledException(
-        'Failed to delete user view: ' + ex.getMessage()
-      );
-    }
-  }
 }
