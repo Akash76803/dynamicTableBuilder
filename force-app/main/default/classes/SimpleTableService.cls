@@ -277,6 +277,19 @@ public inherited sharing class SimpleTableService {
 
     // ─── SOQL Builder ────────────────────────────────────────────────────────
 
+    // SOQL treats field paths case-insensitively, including relationship paths.
+    @TestVisible
+    private static List<String> uniqueQueryFields(List<String> fields) {
+        Set<String> seen = new Set<String>();
+        List<String> result = new List<String>();
+        for (String fieldPath : fields) {
+            if (String.isBlank(fieldPath)) continue;
+            String normalized = fieldPath.trim().toLowerCase();
+            if (seen.add(normalized)) result.add(fieldPath.trim());
+        }
+        return result;
+    }
+
     @TestVisible
     private static String buildQuery(
         String                         baseObject,
@@ -289,7 +302,7 @@ public inherited sharing class SimpleTableService {
         String                         sortColumn,
         String                         sortDirection
     ) {
-        String fieldList = String.join(fields, ', ');
+        String fieldList = String.join(uniqueQueryFields(fields), ', ');
         String soql = 'SELECT ' + fieldList + ' FROM ' + baseObject;
         
         List<String> conditions = new List<String>();
