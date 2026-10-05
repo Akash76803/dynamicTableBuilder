@@ -109,12 +109,7 @@ public with sharing class SDTConfiguratorSelector {
    * @param soql       Complete SOQL string including SELECT, FROM, WHERE, LIMIT
    * @return           List of matching SObject records
    */
-  public static List<SObject> queryRecords(String soql) {
-    System.debug(LoggingLevel.FINE, '[Selector] queryRecords SOQL');
-    List<SObject> records = Database.query(soql, AccessLevel.USER_MODE);
-    System.debug(LoggingLevel.FINE, '[Selector] queryRecords');
-    return records;
-  }
+  
 
   // ── Lookup search query ───────────────────────────────────────────────────
 
@@ -161,28 +156,7 @@ public with sharing class SDTConfiguratorSelector {
    * Performs DML update on a list of pre-built SObjects.
    * Returns list of failed record Ids (empty = all succeeded).
    */
-  public static List<String> saveRecords(List<SObject> records) {
-    List<String> failedIds = new List<String>();
-
-    Database.SaveResult[] results = Database.update(
-      records,
-      false,
-      AccessLevel.USER_MODE
-    ); // partial success with user security
-
-    for (Integer i = 0; i < results.size(); i++) {
-      if (!results[i].isSuccess()) {
-        failedIds.add((String) records[i].get('Id'));
-        for (Database.Error err : results[i].getErrors()) {
-          System.debug(LoggingLevel.FINE, '[Selector] saveRecords DML error on');
-        }
-      }
-    }
-
-    System.debug(LoggingLevel.FINE, '[Selector] saveRecords');
-
-    return failedIds;
-  }
+  
 
   // ── Table Configuration Management (NEW) ──────────────────────────────────
 
@@ -263,116 +237,23 @@ public with sharing class SDTConfiguratorSelector {
   /**
    * Executes an aggregate COUNT() query securely.
    */
-  public static Integer getRecordCount(String soql) {
-    System.debug(LoggingLevel.FINE, '[Selector] getRecordCount SOQL');
-    return Database.countQuery(soql, AccessLevel.USER_MODE);
-  }
+  
 
   // -----------------------------------------------------------------
   // getExportRecords
   // -----------------------------------------------------------------
-  public List<SObject> getExportRecords(
-    List<String> fieldApiNames,
-    String objectApiName,
-    String whereClause,
-    String sortField,
-    String sortDir
-  ) {
-    Set<String> fieldSet = new Set<String>{ 'Id' };
-    fieldSet.addAll(fieldApiNames);
-    String selectClause = String.join(new List<String>(fieldSet), ', ');
+  
 
-    String soql =
-      'SELECT ' +
-      selectClause +
-      ' FROM ' +
-      String.escapeSingleQuotes(objectApiName);
-
-    if (String.isNotBlank(whereClause)) {
-      soql += ' WHERE ' + whereClause;
-    }
-
-    if (String.isNotBlank(sortField)) {
-      String dir = (sortDir == 'DESC') ? 'DESC' : 'ASC';
-      soql += ' ORDER BY ' + String.escapeSingleQuotes(sortField) + ' ' + dir;
-    }
-
-    System.debug(LoggingLevel.FINE, '[Selector] Query executed.');
-    return Database.query(soql, AccessLevel.USER_MODE);
-  }
-
-  public List<AggregateResult> getAggregateRecords(String soql) {
-    if (String.isBlank(soql)) {
-      throw new SDTConfiguratorService.MatrixQueryException(
-        'Aggregate SOQL blank nahi ho sakta.'
-      );
-    }
-
-    System.debug(LoggingLevel.FINE, 'Executing aggregate SOQL:\n');
-
-    try {
-      return (List<AggregateResult>) Database.query(soql, AccessLevel.USER_MODE);
-    } catch (QueryException qe) {
-      System.debug(LoggingLevel.FINE, 'Aggregate query failed');
-      throw new SDTConfiguratorService.MatrixQueryException(
-        'Matrix query failed: ' + qe.getMessage()
-      );
-    }
-  }
+  
 
   /**
    * Fetches all Table_User_View__c records for a given table name belonging to the current user,
    * ordered by Is_Default__c DESC, Name ASC.
    */
-  public static List<Table_User_View__c> getUserViewsByTableName(String tableName) {
-    if (String.isBlank(tableName)) {
-      return new List<Table_User_View__c>();
-    }
-    String trimmedName = tableName.trim();
-    return [
-      SELECT
-        Id,
-        Name,
-        Table_Name__c,
-        Filter_Payload_JSON__c,
-        Column_State_JSON__c,
-        Matrix_Config_JSON__c,
-        Sort_Key__c,
-        Sort_Direction__c,
-        Is_Default__c,
-        Description__c,
-        OwnerId
-      FROM Table_User_View__c
-      WHERE Table_Name__c = :trimmedName
-        AND OwnerId = :UserInfo.getUserId()
-      ORDER BY Is_Default__c DESC, Name ASC
-    ];
-  }
+  
 
   /**
    * Fetches a single Table_User_View__c by its Id.
    */
-  public static Table_User_View__c getUserViewById(Id viewId) {
-    if (viewId == null) {
-      return null;
-    }
-    List<Table_User_View__c> results = [
-      SELECT
-        Id,
-        Name,
-        Table_Name__c,
-        Filter_Payload_JSON__c,
-        Column_State_JSON__c,
-        Matrix_Config_JSON__c,
-        Sort_Key__c,
-        Sort_Direction__c,
-        Is_Default__c,
-        Description__c,
-        OwnerId
-      FROM Table_User_View__c
-      WHERE Id = :viewId
-      LIMIT 1
-    ];
-    return results.isEmpty() ? null : results[0];
-  }
+  
 }
