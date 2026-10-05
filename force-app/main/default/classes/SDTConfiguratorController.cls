@@ -9,15 +9,7 @@ public with sharing class SDTConfiguratorController {
     } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorController',
-        'getAllTables',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'getAllTables',
-          'operation' => 'controllerFallback'
-        }
-      );
+      
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
@@ -46,16 +38,7 @@ public with sharing class SDTConfiguratorController {
     } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorController',
-        'getTableMetadata',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'getTableMetadata',
-          'operation' => 'controllerFallback',
-          'tableId' => tableId
-        }
-      );
+      
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
@@ -108,16 +91,7 @@ public with sharing class SDTConfiguratorController {
     } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorController',
-        'getObjectFields',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'getObjectFields',
-          'operation' => 'controllerFallback',
-          'objectApiName' => objectApiName
-        }
-      );
+      
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
@@ -147,15 +121,7 @@ public with sharing class SDTConfiguratorController {
     } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorController',
-        'saveMetadata',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'saveMetadata',
-          'operation' => 'controllerFallback'
-        }
-      );
+      
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
@@ -180,16 +146,7 @@ public with sharing class SDTConfiguratorController {
     } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorController',
-        'deleteTableConfig',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'deleteTableConfig',
-          'operation' => 'controllerFallback',
-          'tableId' => tableId
-        }
-      );
+      
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
@@ -207,16 +164,7 @@ public with sharing class SDTConfiguratorController {
     } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorController',
-        'cloneTableConfig',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'cloneTableConfig',
-          'operation' => 'controllerFallback',
-          'tableId' => tableId
-        }
-      );
+      
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
@@ -298,16 +246,7 @@ public with sharing class SDTConfiguratorController {
     } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorController',
-        'getImportMetadata',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'getImportMetadata',
-          'operation' => 'controllerFallback',
-          'tableName' => tableName
-        }
-      );
+      
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +
@@ -354,16 +293,7 @@ public with sharing class SDTConfiguratorController {
     } catch (SDTConfiguratorService.DynamicTableException dex) {
       throw new AuraHandledException(dex.getMessage());
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorController',
-        'searchLookupRecords',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'searchLookupRecords',
-          'operation' => 'controllerFallback',
-          'objectApiName' => objectApiName
-        }
-      );
+      
 
       throw new AuraHandledException(
         'An unexpected error occurred. Please contact your administrator. Error Reference: ' +

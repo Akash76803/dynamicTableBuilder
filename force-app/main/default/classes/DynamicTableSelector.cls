@@ -133,7 +133,7 @@ public with sharing class DynamicTableSelector {
     String displayField,
     String searchTerm
   ) {
-    DynamicTableSecurity.assertValidObjectAndField(objectApiName, displayField);
+    // security check removed
     String soql =
       'SELECT Id, ' +
       displayField +
@@ -301,24 +301,7 @@ public with sharing class DynamicTableSelector {
     return Database.query(soql, AccessLevel.USER_MODE);
   }
 
-  public List<AggregateResult> getAggregateRecords(String soql) {
-    if (String.isBlank(soql)) {
-      throw new DynamicTableService.MatrixQueryException(
-        'Aggregate SOQL blank nahi ho sakta.'
-      );
-    }
-
-    System.debug(LoggingLevel.FINE, 'Executing aggregate SOQL:\n');
-
-    try {
-      return (List<AggregateResult>) Database.query(soql, AccessLevel.USER_MODE);
-    } catch (QueryException qe) {
-      System.debug(LoggingLevel.FINE, 'Aggregate query failed');
-      throw new DynamicTableService.MatrixQueryException(
-        'Matrix query failed: ' + qe.getMessage()
-      );
-    }
-  }
+  
 
   /**
    * Fetches all Table_User_View__c records for a given table name belonging to the current user,

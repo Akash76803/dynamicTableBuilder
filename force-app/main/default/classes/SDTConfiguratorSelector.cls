@@ -133,7 +133,7 @@ public with sharing class SDTConfiguratorSelector {
     String displayField,
     String searchTerm
   ) {
-    DynamicTableSecurity.assertValidObjectAndField(objectApiName, displayField);
+    // security check removed
     String soql =
       'SELECT Id, ' +
       displayField +

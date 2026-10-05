@@ -1,18 +1,18 @@
 // [EXPORT FIX] - 2026-06-07 - Add USER_MODE to QueryLocator, validate field paths in buildSingleFilterClause
 /**
  * SDTConfiguratorService
- * GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
- * Service layer GÇö owns ALL business logic and orchestration.
+ * Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
+ * Service layer Gï¿½ï¿½ owns ALL business logic and orchestration.
  * Calls the Selector for data, transforms it, and returns DTOs.
- * Never called directly from LWC GÇö goes through the Controller.
+ * Never called directly from LWC Gï¿½ï¿½ goes through the Controller.
  *
  * Responsibilities:
- *   GÇó Validate inputs
- *   GÇó Resolve Schema metadata (relationship names, picklist values)
- *   GÇó Build the dynamic SOQL field list (delegates execution to Selector)
- *   GÇó Flatten SObject records into cell-based DTO rows
- *   GÇó Filter by parentId when the component is placed on a record page
- *   GÇó Orchestrate the lookup search flow
+ *   Gï¿½ï¿½ Validate inputs
+ *   Gï¿½ï¿½ Resolve Schema metadata (relationship names, picklist values)
+ *   Gï¿½ï¿½ Build the dynamic SOQL field list (delegates execution to Selector)
+ *   Gï¿½ï¿½ Flatten SObject records into cell-based DTO rows
+ *   Gï¿½ï¿½ Filter by parentId when the component is placed on a record page
+ *   Gï¿½ï¿½ Orchestrate the lookup search flow
  *
  * Layer:  Service
  * Calls:  SDTConfiguratorSelector (data), Schema API (metadata)
@@ -149,37 +149,37 @@ public with sharing class SDTConfiguratorService {
     return rawColumns;
   }
 
-  // GöÇGöÇ Main table data method GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Main table data method Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   /**
    * Builds column configs, executes the dynamic SOQL (filtered by parentId
    * when provided), and returns a fully flattened TableResult DTO.
    *
-   * @param tableName   Name field on Table__c GÇö identifies which config to use
-   * @param parentId    Optional GÇö when on a record page, filters child records
+   * @param tableName   Name field on Table__c Gï¿½ï¿½ identifies which config to use
+   * @param parentId    Optional Gï¿½ï¿½ when on a record page, filters child records
    *                    by this Id using the lookup field defined on the column config
    */
   public static SDTConfiguratorDTO.TableResult getTableData(
     String tableName,
     String parentId
   ) {
-    System.debug(LoggingLevel.FINE, '[Service] getTableData GåÆ tableName');
+    System.debug(LoggingLevel.FINE, '[Service] getTableData Gï¿½ï¿½ tableName');
 
-    // GöÇGöÇ 1. Validate & fetch Table__c config GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 1. Validate & fetch Table__c config Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     Table__c tableConfig = validateAndFetchConfig(tableName);
     String baseObject = tableConfig.Object_API_Name__c;
     System.debug(LoggingLevel.FINE, '[Service] Base object');
 
-    // GöÇGöÇ 2. Fetch column configs GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 2. Fetch column configs Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     List<Table_Columns__c> rawColumns = fetchColumnConfigs(tableConfig.Id);
     System.debug(LoggingLevel.FINE, '[Service] Column configs');
 
-    // GöÇGöÇ 3. Build ColumnConfig DTOs + SOQL field list GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 3. Build ColumnConfig DTOs + SOQL field list Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     List<SDTConfiguratorDTO.ColumnConfig> columns = new List<SDTConfiguratorDTO.ColumnConfig>();
     List<String> soqlFields = new List<String>{ 'id' };
     Map<String, String> fieldNameToSoqlPath = new Map<String, String>();
 
-    // Track the parent filter field GÇö the lookup field on the base object
+    // Track the parent filter field Gï¿½ï¿½ the lookup field on the base object
     // that points to the parent record (e.g. OpportunityId on OpportunityLineItem)
     String parentFilterField = null;
     String parentObjectType = String.isNotBlank(parentId)
@@ -195,7 +195,7 @@ public with sharing class SDTConfiguratorService {
         colIndex
       );
 
-      // =ƒöÑ EXISTING METADATA-DRIVEN LOGIC
+      // =ï¿½ï¿½ï¿½ EXISTING METADATA-DRIVEN LOGIC
       if (
         String.isNotBlank(parentId) &&
         parentFilterField == null &&
@@ -206,7 +206,7 @@ public with sharing class SDTConfiguratorService {
       ) {
         parentFilterField = col.Lookup_Field_API_Name__c;
 
-        System.debug(LoggingLevel.FINE, '[Service] G£à Metadata Parent filter');
+        System.debug(LoggingLevel.FINE, '[Service] Gï¿½ï¿½ Metadata Parent filter');
       }
 
       // Existing SOQL field logic (UNCHANGED)
@@ -267,16 +267,16 @@ public with sharing class SDTConfiguratorService {
       colIndex++;
     }
 
-    // =ƒöÑ AUTO-DETECT fallback
+    // =ï¿½ï¿½ï¿½ AUTO-DETECT fallback
     if (String.isNotBlank(parentId) && String.isBlank(parentFilterField)) {
       parentFilterField = autoDetectParentLookup(baseObject, parentObjectType);
 
-      System.debug(LoggingLevel.FINE, '[Service] GÜí Fallback Parent filter');
+      System.debug(LoggingLevel.FINE, '[Service] Gï¿½ï¿½ Fallback Parent filter');
     }
 
     System.debug(LoggingLevel.FINE, '[Service] FINAL parentFilterField');
 
-    // GöÇGöÇ 4. Build SOQL with optional parent WHERE filter and default filters GöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 4. Build SOQL with optional parent WHERE filter and default filters Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     SDTConfiguratorDTO.FilterPayload defaultFilterPayload = buildDefaultFilterPayload(
       rawColumns,
       columns
@@ -290,7 +290,7 @@ public with sharing class SDTConfiguratorService {
       fieldNameToSoqlPath
     );
 
-    // GöÇGöÇ 5. Execute query via Selector GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 5. Execute query via Selector Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     List<SObject> records = new List<SObject>();
     Boolean isVirtual = 'Virtual'.equalsIgnoreCase(tableConfig.Data_Load_Mode__c) || 
                         tableConfig.Enable_Infinite_Scroll__c == true;
@@ -318,10 +318,10 @@ public with sharing class SDTConfiguratorService {
       }
     }
 
-    // GöÇGöÇ 6. Flatten records GåÆ DTO rows GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 6. Flatten records Gï¿½ï¿½ DTO rows Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     List<SDTConfiguratorDTO.RowData> rows = isVirtual ? new List<SDTConfiguratorDTO.RowData>() : flattenRecords(records, columns);
 
-    // GöÇGöÇ 7. Assemble result GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 7. Assemble result Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     SDTConfiguratorDTO.TableResult result = new SDTConfiguratorDTO.TableResult();
     result.columns = columns;
     result.rows = rows;
@@ -406,7 +406,7 @@ public with sharing class SDTConfiguratorService {
       if (dfr.getType() == Schema.DisplayType.REFERENCE) {
         for (Schema.SObjectType refObj : dfr.getReferenceTo()) {
           if (refObj.getDescribe().getName().equalsIgnoreCase(parentObject)) {
-            System.debug(LoggingLevel.FINE, '[Service] =ƒöÑ Auto detected lookup');
+            System.debug(LoggingLevel.FINE, '[Service] =ï¿½ï¿½ï¿½ Auto detected lookup');
             return fieldName;
           }
         }
@@ -416,7 +416,7 @@ public with sharing class SDTConfiguratorService {
     return null;
   }
 
-  // GöÇGöÇ Lookup search method GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Lookup search method Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   /**
    * Validates the object and field, then delegates search to Selector.
@@ -427,7 +427,7 @@ public with sharing class SDTConfiguratorService {
     String searchTerm,
     String nameField
   ) {
-    System.debug(LoggingLevel.FINE, '[Service] searchLookupRecords GåÆ object');
+    System.debug(LoggingLevel.FINE, '[Service] searchLookupRecords Gï¿½ï¿½ object');
 
     List<SDTConfiguratorDTO.LookupSearchResult> results = new List<SDTConfiguratorDTO.LookupSearchResult>();
 
@@ -461,18 +461,9 @@ public with sharing class SDTConfiguratorService {
         escapedTerm
       );
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'searchLookupRecords',
-        ex,
-        new Map<String, Object>{
-          'objectApiName' => objectApiName,
-          'searchField' => nameField,
-          'methodName' => 'searchLookupRecords'
-        }
-      );
+      
       throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + errorRef
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + ex.getMessage()
       );
     }
 
@@ -487,7 +478,7 @@ public with sharing class SDTConfiguratorService {
     return results;
   }
 
-  // GöÇGöÇ Private: build one ColumnConfig DTO from a Table_Columns__c record GöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Private: build one ColumnConfig DTO from a Table_Columns__c record Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   public static SDTConfiguratorDTO.ColumnConfig buildColumnConfig(
     Table_Columns__c col,
@@ -508,7 +499,7 @@ public with sharing class SDTConfiguratorService {
     cc.order = col.Index__c != null
       ? ((Decimal) col.Index__c).intValue()
       : colIndex;
-    // =ƒöÑ NEW: Map visibility, search, and filter fields
+    // =ï¿½ï¿½ï¿½ NEW: Map visibility, search, and filter fields
     cc.isVisible = col.Is_Visible__c != null ? col.Is_Visible__c : true; // default true
     cc.isSearchable = col.Is_Searchable__c != null
       ? col.Is_Searchable__c
@@ -519,7 +510,7 @@ public with sharing class SDTConfiguratorService {
     cc.filterType = col.Filter_Type__c;
     cc.defaultFilterValue = col.Default_Filter_Value__c;
 
-    // GöÇGöÇ SECURITY HARDENING: Bypass metadata if permissions are missing GöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ SECURITY HARDENING: Bypass metadata if permissions are missing Gï¿½ï¿½Gï¿½ï¿½
     if (!col.Additional_Column__c) {
       Map<String, Schema.SObjectField> fieldMap = getFieldMap(baseObject);
       if (fieldMap != null) {
@@ -548,17 +539,17 @@ public with sharing class SDTConfiguratorService {
     cc.isText = (col.Data_Type__c == 'Text');
     cc.isNumber = (col.Data_Type__c == 'Number');
     cc.isCurrency = (col.Data_Type__c == 'Currency');
-    cc.isPercentage = (col.Data_Type__c == 'Percentage'); // =ƒöÑ NEW
+    cc.isPercentage = (col.Data_Type__c == 'Percentage'); // =ï¿½ï¿½ï¿½ NEW
     cc.isDate = (col.Data_Type__c == 'Date');
     cc.isDateTime = (col.Data_Type__c == 'DateTime');
     cc.isBoolean = (col.Data_Type__c == 'Boolean');
     cc.isPicklist = (col.Data_Type__c == 'Picklist');
     cc.isNumeric = (cc.isNumber || cc.isCurrency || cc.isPercentage);
     cc.isLookup = (col.Data_Type__c == 'Lookup');
-    cc.isPhone = (col.Data_Type__c == 'Phone'); // =ƒöÑ NEW
-    cc.isEmail = (col.Data_Type__c == 'Email'); // =ƒöÑ NEW
-    cc.isUrl = (col.Data_Type__c == 'Url'); // =ƒöÑ NEW
-    cc.isRichText = (col.Data_Type__c == 'RichText'); // =ƒöÑ NEW
+    cc.isPhone = (col.Data_Type__c == 'Phone'); // =ï¿½ï¿½ï¿½ NEW
+    cc.isEmail = (col.Data_Type__c == 'Email'); // =ï¿½ï¿½ï¿½ NEW
+    cc.isUrl = (col.Data_Type__c == 'Url'); // =ï¿½ï¿½ï¿½ NEW
+    cc.isRichText = (col.Data_Type__c == 'RichText'); // =ï¿½ï¿½ï¿½ NEW
     cc.isLongText = (col.Data_Type__c == 'LongText');
 
     // Resolve relationship name for lookup/parent fields via Schema Describe
@@ -595,7 +586,7 @@ public with sharing class SDTConfiguratorService {
     return cc;
   }
 
-  // GöÇGöÇ Private: build the dynamic SOQL string GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Private: build the dynamic SOQL string Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   public static String buildDataQuery(
     String baseObject,
@@ -621,7 +612,7 @@ public with sharing class SDTConfiguratorService {
     return soql;
   }
 
-  // GöÇGöÇ Private: flatten SObject records GåÆ DTO rows GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Private: flatten SObject records Gï¿½ï¿½ DTO rows Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   public static List<SDTConfiguratorDTO.RowData> flattenRecords(
     List<SObject> records,
@@ -706,7 +697,7 @@ public with sharing class SDTConfiguratorService {
     String actionId,
     List<Id> recordIds
   ) {
-    System.debug(LoggingLevel.FINE, '[Service] executeTableAction GåÆ actionId');
+    System.debug(LoggingLevel.FINE, '[Service] executeTableAction Gï¿½ï¿½ actionId');
     SDTConfiguratorDTO.ActionResponse response = new SDTConfiguratorDTO.ActionResponse();
 
     try {
@@ -734,19 +725,10 @@ public with sharing class SDTConfiguratorService {
     } catch (DynamicTableException dex) {
       throw dex;
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'executeTableAction',
-        ex,
-        new Map<String, Object>{
-          'actionName' => actionId,
-          'recordCount' => recordIds != null ? recordIds.size() : 0,
-          'methodName' => 'executeTableAction'
-        }
-      );
+      
 
       response.success = false;
-      response.message = 'Action failed due to an unexpected error. Please contact your administrator. Error Reference: ' + errorRef;
+      response.message = 'Action failed due to an unexpected error. Please contact your administrator. Error Reference: ' + ex.getMessage();
       return response;
     }
   }
@@ -779,11 +761,11 @@ public with sharing class SDTConfiguratorService {
     }
   }
 
-  // GöÇGöÇ Private: Schema utilities GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Private: Schema utilities Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   /**
    * Resolves the relationship name from a lookup field API name using Schema.Describe.
-   * e.g. Contact__c GåÆ Contact__r,  AccountId GåÆ Account
+   * e.g. Contact__c Gï¿½ï¿½ Contact__r,  AccountId Gï¿½ï¿½ Account
    */
   private static String resolveRelationshipName(
     String objectApiName,
@@ -993,14 +975,14 @@ public with sharing class SDTConfiguratorService {
         return null;
       return currentObj.get(parts[parts.size() - 1]);
     } catch (Exception ex) {
-      System.debug(LoggingLevel.FINE, '[Service] traverseSObject error GÇö path');
+      System.debug(LoggingLevel.FINE, '[Service] traverseSObject error Gï¿½ï¿½ path');
       return null;
     }
   }
 
   /**
    * Derives the SObject type name from a Salesforce record Id using prefix lookup.
-   * e.g. '006...' GåÆ 'Opportunity', '003...' GåÆ 'Contact'
+   * e.g. '006...' Gï¿½ï¿½ 'Opportunity', '003...' Gï¿½ï¿½ 'Contact'
    * Falls back to Schema.describeSObjects for custom object prefix resolution.
    */
   private static String getObjectTypeFromId(String recordId) {
@@ -1020,17 +1002,17 @@ public with sharing class SDTConfiguratorService {
   /**
    * Receives a JSON array of SaveRequest from LWC.
    * Maps each request back to the real SObject + field names using
-   * Table_Columns__c config (col.key GåÆ fieldName + lookupField).
+   * Table_Columns__c config (col.key Gï¿½ï¿½ fieldName + lookupField).
    * Performs partial DML and returns a SaveResult.
    *
-   * @param tableName   Same tableName used to load GÇö needed to resolve col keys GåÆ fieldNames
+   * @param tableName   Same tableName used to load Gï¿½ï¿½ needed to resolve col keys Gï¿½ï¿½ fieldNames
    * @param recordsJson JSON-serialised List<SaveRequest>
    */
   public static SDTConfiguratorDTO.SaveResult saveTableData(
     String tableName,
     String recordsJson
   ) {
-    System.debug(LoggingLevel.FINE, '[Service] saveTableData GåÆ tableName');
+    System.debug(LoggingLevel.FINE, '[Service] saveTableData Gï¿½ï¿½ tableName');
     System.debug(LoggingLevel.INFO, '[Service] saveTableData request received.');
 
     SDTConfiguratorDTO.SaveResult result = new SDTConfiguratorDTO.SaveResult();
@@ -1038,7 +1020,7 @@ public with sharing class SDTConfiguratorService {
 
     try {
 
-          // GöÇGöÇ 1. Validate inputs GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+          // Gï¿½ï¿½Gï¿½ï¿½ 1. Validate inputs Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
           if (String.isBlank(tableName)) {
             throw new DynamicTableException('tableName is required for save.');
           }
@@ -1046,7 +1028,7 @@ public with sharing class SDTConfiguratorService {
             throw new DynamicTableException('No records provided for save.');
           }
 
-          // GöÇGöÇ 2. Parse payload GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+          // Gï¿½ï¿½Gï¿½ï¿½ 2. Parse payload Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
           List<SDTConfiguratorDTO.SaveRequest> saveRequests;
           try {
             saveRequests = (List<SDTConfiguratorDTO.SaveRequest>) JSON.deserialize(
@@ -1065,7 +1047,7 @@ public with sharing class SDTConfiguratorService {
             return result;
           }
 
-          // GöÇGöÇ 3. Load table config to resolve col key GåÆ real fieldName GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+          // Gï¿½ï¿½Gï¿½ï¿½ 3. Load table config to resolve col key Gï¿½ï¿½ real fieldName Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
           Table__c tableConfig = SDTConfiguratorSelector.resolveTableConfig(tableName);
           if (tableConfig == null) {
             throw new DynamicTableException('No Table__c found for: ' + tableName);
@@ -1077,7 +1059,7 @@ public with sharing class SDTConfiguratorService {
 
           String baseObject = tableConfig.Object_API_Name__c;
 
-          // Build key GåÆ column map  (key = col0, col1 GÇª matches what LWC sends)
+          // Build key Gï¿½ï¿½ column map  (key = col0, col1 GÇª matches what LWC sends)
           Map<String, Table_Columns__c> keyToCol = new Map<String, Table_Columns__c>();
           Integer idx = 0;
           for (Table_Columns__c col : rawColumns) {
@@ -1087,14 +1069,14 @@ public with sharing class SDTConfiguratorService {
 
           System.debug(LoggingLevel.FINE, '[Service] saveTableData keyToCol');
 
-          // GöÇGöÇ 4. Get SObject type once GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+          // Gï¿½ï¿½Gï¿½ï¿½ 4. Get SObject type once Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
           Schema.SObjectType objType = getSObjectType(baseObject);
           if (objType == null) {
             throw new DynamicTableException('Unknown SObject: ' + baseObject);
           }
           Map<String, Schema.SObjectField> fieldMap = getFieldMap(baseObject);
 
-          // GöÇGöÇ 5. Build SObjects for DML GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+          // Gï¿½ï¿½Gï¿½ï¿½ 5. Build SObjects for DML Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
           List<SObject> toUpdate = new List<SObject>();
 
           for (SDTConfiguratorDTO.SaveRequest req : saveRequests) {
@@ -1120,7 +1102,7 @@ public with sharing class SDTConfiguratorService {
             return result;
           }
 
-          // GöÇGöÇ 6. DML via Selector GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+          // Gï¿½ï¿½Gï¿½ï¿½ 6. DML via Selector Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
           List<String> failedIds = SDTConfiguratorSelector.saveRecords(toUpdate);
           result.failedRecordIds = failedIds;
 
@@ -1136,18 +1118,10 @@ public with sharing class SDTConfiguratorService {
     } catch (DynamicTableException dex) {
       throw dex;
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'saveTableData',
-        ex,
-        new Map<String, Object>{
-          'tableName' => tableName,
-          'methodName' => 'saveTableData'
-        }
-      );
+      
 
       result.success = false;
-      result.message = 'Save failed due to an unexpected error. Please contact your administrator. Error Reference: ' + errorRef;
+      result.message = 'Save failed due to an unexpected error. Please contact your administrator. Error Reference: ' + ex.getMessage();
       return result;
     }
     return result;
@@ -1170,7 +1144,7 @@ public with sharing class SDTConfiguratorService {
       if (col.Additional_Column__c)
         continue;
 
-      // Lookup GåÆ write to the Id field (e.g. Contact__c), not the rel field
+      // Lookup Gï¿½ï¿½ write to the Id field (e.g. Contact__c), not the rel field
       String targetField = String.isNotBlank(col.Lookup_Field_API_Name__c)
         ? col.Lookup_Field_API_Name__c
         : col.Column_API_Name__c;
@@ -1217,7 +1191,7 @@ public with sharing class SDTConfiguratorService {
     }
   }
 
-  // GöÇGöÇ Private: type-safe value casting GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Private: type-safe value casting Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   private static Object castValue(String raw, Schema.DisplayType fieldType) {
     if (raw == null || raw == '')
@@ -1240,7 +1214,7 @@ public with sharing class SDTConfiguratorService {
       return Date.valueOf(raw); // expects ISO: yyyy-MM-dd
     }
     if (fieldType == Schema.DisplayType.DATETIME) {
-      return DateTime.valueOf(raw.replace('T', ' ')); // ISO GåÆ Apex format
+      return DateTime.valueOf(raw.replace('T', ' ')); // ISO Gï¿½ï¿½ Apex format
     }
     if (fieldType == Schema.DisplayType.REFERENCE) {
       return (Id) raw; // lookup Id
@@ -1249,9 +1223,9 @@ public with sharing class SDTConfiguratorService {
     return raw; // String, Picklist, etc.
   }
 
-  // GòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉ
+  // Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
   // ADD these methods inside SDTConfiguratorService class
-  // GòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉ
+  // Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   /**
    * Server-side filtered table data.
@@ -1270,17 +1244,17 @@ public with sharing class SDTConfiguratorService {
     String parentId,
     String filtersJson
   ) {
-    System.debug(LoggingLevel.FINE, '[Service] getFilteredTableData GåÆ tableName');
+    System.debug(LoggingLevel.FINE, '[Service] getFilteredTableData Gï¿½ï¿½ tableName');
 
-    // GöÇGöÇ 1. Validate & fetch Table__c config GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 1. Validate & fetch Table__c config Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     Table__c tableConfig = validateAndFetchConfig(tableName);
     String baseObject = tableConfig.Object_API_Name__c;
 
-    // GöÇGöÇ 2. Fetch column configs GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 2. Fetch column configs Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     List<Table_Columns__c> rawColumns = fetchColumnConfigs(tableConfig.Id);
 
-    // GöÇGöÇ 3. Build ColumnConfig DTOs + SOQL field list GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
-    //      (identical to getTableData GÇö reuse same logic)
+    // Gï¿½ï¿½Gï¿½ï¿½ 3. Build ColumnConfig DTOs + SOQL field list Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
+    //      (identical to getTableData Gï¿½ï¿½ reuse same logic)
     List<SDTConfiguratorDTO.ColumnConfig> columns = new List<SDTConfiguratorDTO.ColumnConfig>();
     List<String> soqlFields = new List<String>{ 'Id' };
     String parentFilterField = null;
@@ -1288,7 +1262,7 @@ public with sharing class SDTConfiguratorService {
       ? getObjectTypeFromId(parentId)
       : null;
 
-    // Build fieldName GåÆ soqlFieldPath map for filter clause resolution
+    // Build fieldName Gï¿½ï¿½ soqlFieldPath map for filter clause resolution
     // Key: column fieldName (e.g. StageName), Value: soqlFieldPath (e.g. StageName or Account.Name)
     Map<String, String> fieldNameToSoqlPath = new Map<String, String>();
 
@@ -1355,7 +1329,7 @@ public with sharing class SDTConfiguratorService {
       parentFilterField = autoDetectParentLookup(baseObject, parentObjectType);
     }
 
-    // GöÇGöÇ 4. Parse filter payload GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 4. Parse filter payload Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     SDTConfiguratorDTO.FilterPayload filterPayload = null;
     if (String.isNotBlank(filtersJson)) {
       try {
@@ -1365,7 +1339,7 @@ public with sharing class SDTConfiguratorService {
         );
       } catch (Exception ex) {
         System.debug(LoggingLevel.FINE, '[Service] getFilteredTableData: invalid filtersJson');
-        // Degrade gracefully GÇö run without filters rather than throwing
+        // Degrade gracefully Gï¿½ï¿½ run without filters rather than throwing
         filterPayload = null;
       }
     }
@@ -1389,7 +1363,7 @@ public with sharing class SDTConfiguratorService {
       }
     }
 
-    // GöÇGöÇ 5. Build SOQL with parent WHERE + filter WHERE GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 5. Build SOQL with parent WHERE + filter WHERE Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     String soql = buildFilteredDataQuery(
       baseObject,
       soqlFields,
@@ -1399,7 +1373,7 @@ public with sharing class SDTConfiguratorService {
       fieldNameToSoqlPath
     );
 
-    // GöÇGöÇ 6. Execute via Selector GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 6. Execute via Selector Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     List<SObject> records;
     try {
       records = SDTConfiguratorSelector.queryRecords(soql);
@@ -1407,25 +1381,16 @@ public with sharing class SDTConfiguratorService {
       if (Test.isRunningTest()) {
         throw ex;
       }
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'getFilteredTableData',
-        ex,
-        new Map<String, Object>{
-          'tableName' => tableName,
-          'parentId' => parentId,
-          'methodName' => 'getFilteredTableData'
-        }
-      );
+      
       throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + errorRef
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + ex.getMessage()
       );
     }
 
-    // GöÇGöÇ 7. Flatten GåÆ DTO rows (reuse existing private method) GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 7. Flatten Gï¿½ï¿½ DTO rows (reuse existing private method) Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     List<SDTConfiguratorDTO.RowData> rows = flattenRecords(records, columns);
 
-    // GöÇGöÇ 8. Assemble result GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 8. Assemble result Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     SDTConfiguratorDTO.TableResult result = new SDTConfiguratorDTO.TableResult();
     result.columns = columns;
     result.rows = rows;
@@ -1436,7 +1401,7 @@ public with sharing class SDTConfiguratorService {
     return result;
   }
 
-  // GöÇGöÇ Private: builds SOQL with both parent filter AND user filter criteria GöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Private: builds SOQL with both parent filter AND user filter criteria Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   public static String buildFilteredDataQuery(
     String baseObject,
@@ -1448,14 +1413,14 @@ public with sharing class SDTConfiguratorService {
   ) {
     List<String> whereClauses = new List<String>();
 
-    // GöÇGöÇ Parent record filter (existing behaviour, unchanged) GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ Parent record filter (existing behaviour, unchanged) Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     if (String.isNotBlank(parentId) && String.isNotBlank(parentFilterField)) {
       String safeId = String.escapeSingleQuotes(parentId);
       whereClauses.add(parentFilterField + ' = \'' + safeId + '\'');
       System.debug(LoggingLevel.FINE, '[Service] buildFilteredDataQuery: parent clause');
     }
 
-    // GöÇGöÇ User filter criteria GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ User filter criteria Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     if (
       filterPayload != null &&
       filterPayload.filters != null &&
@@ -1501,7 +1466,7 @@ public with sharing class SDTConfiguratorService {
       }
     }
 
-    // GöÇGöÇ Assemble final SOQL GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ Assemble final SOQL Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     String soql =
       'SELECT ' +
       String.join(soqlFields, ', ') +
@@ -1664,7 +1629,7 @@ public with sharing class SDTConfiguratorService {
     return payload.filters.isEmpty() ? null : payload;
   }
 
-  // GöÇGöÇ Private: builds a single SOQL clause for one FilterCriteria GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Private: builds a single SOQL clause for one FilterCriteria Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   private static String formatSoqlValue(Object rawVal, String dataType) {
     if (rawVal == null)
@@ -1885,7 +1850,7 @@ public with sharing class SDTConfiguratorService {
     return '';
   }
 
-  // GöÇGöÇ Private: filter clause helpers GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Private: filter clause helpers Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   private static Boolean isNumericType(String dataType) {
     return dataType == 'Number' ||
@@ -1899,9 +1864,9 @@ public with sharing class SDTConfiguratorService {
 
   /**
    * Converts an ISO date string from LWC into a SOQL-safe date/datetime literal.
-   * Date:     2024-03-15              GåÆ 2024-03-15
-   * DateTime: 2024-03-15T00:00:00Z   GåÆ 2024-03-15T00:00:00Z
-   * No quotes GÇö SOQL date literals are unquoted.
+   * Date:     2024-03-15              Gï¿½ï¿½ 2024-03-15
+   * DateTime: 2024-03-15T00:00:00Z   Gï¿½ï¿½ 2024-03-15T00:00:00Z
+   * No quotes Gï¿½ï¿½ SOQL date literals are unquoted.
    */
   private static String toSoqlDateLiteral(String isoValue, String dataType) {
     if (String.isBlank(isoValue))
@@ -1943,7 +1908,7 @@ public with sharing class SDTConfiguratorService {
   /**
    * Converts a comma-separated picklist value string into a
    * SOQL-safe IN list of quoted strings.
-   * e.g. "Closed Won,Closed Lost" GåÆ ['Closed Won', 'Closed Lost']
+   * e.g. "Closed Won,Closed Lost" Gï¿½ï¿½ ['Closed Won', 'Closed Lost']
    */
   private static List<String> buildInList(String commaSeparated) {
     List<String> result = new List<String>();
@@ -1958,9 +1923,9 @@ public with sharing class SDTConfiguratorService {
     return result;
   }
 
-  // GòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉ
+  // Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
   // Export QueryLocator & Record Counting
-  // GòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉGòÉ
+  // Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   /**
    * Returns the exact database record count for the given table and filters.
@@ -1999,7 +1964,7 @@ public with sharing class SDTConfiguratorService {
     String searchTerm,
     Boolean applySafetyLimit
   ) {
-    System.debug(LoggingLevel.FINE, '[Service] getRecordCount GåÆ tableName');
+    System.debug(LoggingLevel.FINE, '[Service] getRecordCount Gï¿½ï¿½ tableName');
 
     if (String.isBlank(tableName)) {
       throw new DynamicTableException('tableName is required for counting.');
@@ -2170,7 +2135,7 @@ public with sharing class SDTConfiguratorService {
       soql += ' WHERE ' + String.join(whereClauses, ' AND ');
     }
 
-    // Cap at 45,005 GÇö strictly above matrixAggregateLimit (45,000) but safely below the
+    // Cap at 45,005 Gï¿½ï¿½ strictly above matrixAggregateLimit (45,000) but safely below the
     // 50,000 governor limit (accounting for ~50 metadata query rows in the same transaction).
     // Using 45,000 here would cause the Orchestrator to see rowCount == limit and treat it as
     // "within bounds", proceeding to a synchronous GROUP BY scan that crashes on 50,001+ records.
@@ -2179,18 +2144,9 @@ public with sharing class SDTConfiguratorService {
     try {
       return SDTConfiguratorSelector.getRecordCount(soql);
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'getRecordCount',
-        ex,
-        new Map<String, Object>{
-          'tableName' => tableName,
-          'parentId' => parentId,
-          'methodName' => 'getRecordCount'
-        }
-      );
+      
       throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + errorRef
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + ex.getMessage()
       );
     }
   }
@@ -2386,18 +2342,9 @@ public with sharing class SDTConfiguratorService {
     try {
       rows = new SDTConfiguratorSelector().getAggregateRecords(soql);
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'getGrandTotals',
-        ex,
-        new Map<String, Object>{
-          'tableName' => tableName,
-          'parentId' => parentId,
-          'methodName' => 'getGrandTotals'
-        }
-      );
+      
       throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + errorRef
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + ex.getMessage()
       );
     }
     Map<String, Decimal> totals = new Map<String, Decimal>();
@@ -2429,9 +2376,9 @@ public with sharing class SDTConfiguratorService {
     String matrixParamsJson,
     String searchTerm
   ) {
-    System.debug(LoggingLevel.FINE, '[Service] getExportQueryLocator GåÆ tableName');
+    System.debug(LoggingLevel.FINE, '[Service] getExportQueryLocator Gï¿½ï¿½ tableName');
 
-    // GöÇGöÇ 1. Fetch config GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 1. Fetch config Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     if (String.isBlank(tableName)) {
       throw new DynamicTableException('tableName is required for export.');
     }
@@ -2445,7 +2392,7 @@ public with sharing class SDTConfiguratorService {
 
     String baseObject = tableConfig.Object_API_Name__c;
 
-    // GöÇGöÇ 2. Fetch columns GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 2. Fetch columns Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     List<Table_Columns__c> rawColumns = SDTConfiguratorSelector.getColumnsByTableId(
       tableConfig.Id
     );
@@ -2456,7 +2403,7 @@ public with sharing class SDTConfiguratorService {
       );
     }
 
-    // GöÇGöÇ 3. Build column configs + SOQL fields (same as getTableData) GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 3. Build column configs + SOQL fields (same as getTableData) Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     List<SDTConfiguratorDTO.ColumnConfig> columns = new List<SDTConfiguratorDTO.ColumnConfig>();
     List<String> soqlFields = new List<String>{ 'id' };
     String parentFilterField = null;
@@ -2544,7 +2491,7 @@ public with sharing class SDTConfiguratorService {
       parentFilterField = autoDetectParentLookup(baseObject, parentObjectType);
     }
 
-    // GöÇGöÇ 4. Parse filters & Matrix params GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 4. Parse filters & Matrix params Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     SDTConfiguratorDTO.FilterPayload filterPayload = null;
     if (String.isNotBlank(filtersJson)) {
       try {
@@ -2611,7 +2558,7 @@ public with sharing class SDTConfiguratorService {
       }
     }
 
-    // GöÇGöÇ 5. Build SOQL (no LIMIT for batch) GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+    // Gï¿½ï¿½Gï¿½ï¿½ 5. Build SOQL (no LIMIT for batch) Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
     List<String> whereClauses = new List<String>();
 
     if (String.isNotBlank(parentId) && String.isNotBlank(parentFilterField)) {
@@ -2686,12 +2633,12 @@ public with sharing class SDTConfiguratorService {
       soql += ' WHERE ' + String.join(whereClauses, ' AND ');
     }
 
-    // NO LIMIT GÇö batch handles all records
+    // NO LIMIT Gï¿½ï¿½ batch handles all records
     System.debug(LoggingLevel.FINE, '[Service] getExportQueryLocator SOQL');
     return Database.getQueryLocator(soql, AccessLevel.USER_MODE);
   }
 
-  // GöÇGöÇ Custom exception GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Custom exception Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   public class DynamicTableException extends Exception {
   }
@@ -2772,7 +2719,7 @@ public with sharing class SDTConfiguratorService {
     }
     return results;
   }
-  // GöÇGöÇ Table Configuration Management (NEW) GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Table Configuration Management (NEW) Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
 
   /**
    * Fetches the full metadata structure for a table.
@@ -2875,21 +2822,10 @@ public with sharing class SDTConfiguratorService {
     } catch (DynamicTableException dex) {
       throw dex;
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'saveMetadata',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'saveMetadata',
-          'operation' => 'save',
-          'tableName' => table != null ? table.Name : 'Unknown',
-          'columnCount' => columns != null ? columns.size() : 0,
-          'actionCount' => actions != null ? actions.size() : 0
-        }
-      );
+      
 
       throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + errorRef
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + ex.getMessage()
       );
     }
   }
@@ -2940,24 +2876,15 @@ public with sharing class SDTConfiguratorService {
     } catch (DynamicTableException dex) {
       throw dex;
     } catch (Exception ex) {
-      String errorRef = DynamicTableErrorLogger.logException(
-        'SDTConfiguratorService',
-        'cloneTableConfig',
-        ex,
-        new Map<String, Object>{
-          'methodName' => 'cloneTableConfig',
-          'operation' => 'clone',
-          'tableId' => tableId
-        }
-      );
+      
 
       throw new AuraHandledException(
-        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + errorRef
+        'An unexpected error occurred. Please contact your administrator. Error Reference: ' + ex.getMessage()
       );
     }
   }
 
-  // GöÇGöÇ Helper: Resolve Access Overrides GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // Gï¿½ï¿½Gï¿½ï¿½ Helper: Resolve Access Overrides Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½Gï¿½ï¿½
   private static void applyAccessOverrides(
     SDTConfiguratorDTO.TableResult result,
     Table__c tableConfig
@@ -3622,10 +3549,10 @@ public with sharing class SDTConfiguratorService {
     if (String.isNotBlank(whereClause)) {
       soql += ' WHERE ' + whereClause;
     }
-    // Cap at 45,005 GÇö strictly above matrixAggregateLimit (45,000) so the Orchestrator
-    // correctly detects oversized datasets (sourceRecordCount >= 45,000 GåÆ ASYNC_REQUIRED),
+    // Cap at 45,005 Gï¿½ï¿½ strictly above matrixAggregateLimit (45,000) so the Orchestrator
+    // correctly detects oversized datasets (sourceRecordCount >= 45,000 Gï¿½ï¿½ ASYNC_REQUIRED),
     // while staying safely below the 50,000 governor limit (~50 metadata rows also consumed).
-    // LIMIT 50001 was the original crash point: COUNT() would scan all 50,001 rows GåÆ LimitException.
+    // LIMIT 50001 was the original crash point: COUNT() would scan all 50,001 rows Gï¿½ï¿½ LimitException.
     soql += ' LIMIT 49500';
 
     return SDTConfiguratorSelector.getRecordCount(soql);
@@ -4041,7 +3968,7 @@ public with sharing class SDTConfiguratorService {
     return sum;
   }
 
-  // [CPU FIX] Lightweight method GÇö returns expression count based on granularity
+  // [CPU FIX] Lightweight method Gï¿½ï¿½ returns expression count based on granularity
   // without performing heavy Schema.getGlobalDescribe / validateFieldPath calls
   private Integer getGroupExpressionCount(SDTConfiguratorDTO.MatrixGroupField gf) {
     if (String.isBlank(gf.granularity)) {
@@ -4086,7 +4013,7 @@ public with sharing class SDTConfiguratorService {
     return String.valueOf(first) + ' ' + String.valueOf(second);
   }
 
-  // Original formatGroupValue GÇö retained for backward compatibility in query building
+  // Original formatGroupValue Gï¿½ï¿½ retained for backward compatibility in query building
   private String formatGroupValue(
     AggregateResult ar,
     Integer groupIndex,
