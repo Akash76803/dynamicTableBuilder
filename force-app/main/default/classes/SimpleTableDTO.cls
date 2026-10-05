@@ -35,6 +35,8 @@ public class SimpleTableDTO {
         @AuraEnabled public Boolean isDateTime;
         @AuraEnabled public Boolean isBoolean;
         @AuraEnabled public Boolean isPicklist;
+        public String linkIdPath;
+        public String linkLabelPath;
         @AuraEnabled public Boolean isLookup;
         @AuraEnabled public List<PicklistOption> picklistOptions; // Added for Picklist/Multipicklist
     }
@@ -62,9 +64,16 @@ public class SimpleTableDTO {
      * Represents a single data row returned to the LWC.
      * fields map: ColumnDef.key → raw display value
      */
+    public class RecordLink {
+        @AuraEnabled public String recordId;
+        @AuraEnabled public String objectApiName;
+        @AuraEnabled public String label;
+    }
+
     public class RowData {
         @AuraEnabled public String              recordId;
         @AuraEnabled public Map<String, Object> fields;
+        @AuraEnabled public Map<String, RecordLink> recordLinks;
     }
 
     // ─── Table Result ────────────────────────────────────────────────────────

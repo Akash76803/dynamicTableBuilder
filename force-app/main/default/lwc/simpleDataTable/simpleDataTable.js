@@ -1,6 +1,7 @@
 import { LightningElement, api, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import getTableData from '@salesforce/apex/SimpleTableController.getTableData';
-export default class SimpleDataTable extends LightningElement {
+export default class SimpleDataTable extends NavigationMixin(LightningElement) {
     
     @api tableName;
     @api recordId; // Optional, for record pages
@@ -39,6 +40,8 @@ export default class SimpleDataTable extends LightningElement {
 
     // ─── Data Fetching ────────────────────────────────────────────────────────
     
+    recordUrls = {};
+    _urlGeneration = 0;
     _parentId = '';
     _searchTimeout;
 
@@ -50,6 +53,7 @@ export default class SimpleDataTable extends LightningElement {
 
     disconnectedCallback() {
         clearTimeout(this._searchTimeout);
+        this._urlGeneration++;
         this._stopResize();
     }
 
@@ -108,12 +112,14 @@ export default class SimpleDataTable extends LightningElement {
             return {
                 recordId: r.recordId,
                 fields: r.fields,
+                recordLinks: r.recordLinks || {},
                 _flatRecord: flatRecord
             };
         });
 
         // 3. Apply Filters and Render
         this._applyFiltersAndFormat();
+        this._prepareRecordUrls();
     }
 
     // ─── UI Getters ───────────────────────────────────────────────────────────
@@ -406,17 +412,8 @@ export default class SimpleDataTable extends LightningElement {
 
         this.filteredRows = pagedRows.map(r => {
             // Cells for table view
-            const cells = visCols.map(c => ({
-                key: c.key,
-                value: this._formatValue(r.fields[c.key], c)
-            }));
-
-            // Cells for card view
-            const cardCells = topCardCols.map(c => ({
-                key: c.key,
-                label: c.label,
-                value: this._formatValue(r.fields[c.key], c)
-            }));
+            const cells = visCols.map(c => this._recordCell(r, c));
+            const cardCells = topCardCols.map(c => ({ ...this._recordCell(r, c), label: c.label }));
 
             return {
                 ...r,
@@ -473,6 +470,38 @@ export default class SimpleDataTable extends LightningElement {
         }
 
         this.aggregateRow = hasAgg ? aggCells : null;
+    }
+
+    _recordCell(row, column) {
+        const link = row.recordLinks[column.key];
+        const href = link && this.recordUrls[link.recordId];
+        return { key: column.key, value: link ? link.label : this._formatValue(row.fields[column.key], column),
+            isRecordLink: !!href, href: href || '', recordId: link ? link.recordId : '', objectApiName: link ? link.objectApiName : '' };
+    }
+
+    _recordPage(recordId, objectApiName) {
+        return { type: 'standard__recordPage', attributes: { recordId, objectApiName, actionName: 'view' } };
+    }
+
+    async _prepareRecordUrls() {
+        const generation = ++this._urlGeneration;
+        const unique = new Map();
+        this.rows.forEach(row => Object.values(row.recordLinks).forEach(link => unique.set(link.recordId, link)));
+        const urls = {};
+        await Promise.all([...unique.values()].map(async link => {
+            try { urls[link.recordId] = await this[NavigationMixin.GenerateUrl](this._recordPage(link.recordId, link.objectApiName)); }
+            catch (error) { /* Keep readable text if navigation is unavailable. */ }
+        }));
+        if (generation !== this._urlGeneration) return;
+        this.recordUrls = urls;
+        this._applyFiltersAndFormat();
+    }
+
+    handleRecordClick(event) {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button > 0) return;
+        event.preventDefault();
+        const { recordId, objectApiName } = event.currentTarget.dataset;
+        this[NavigationMixin.Navigate](this._recordPage(recordId, objectApiName));
     }
 
     _formatValue(val, col) {

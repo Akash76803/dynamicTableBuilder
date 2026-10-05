@@ -75,6 +75,9 @@ public inherited sharing class SimpleTableService {
                     String lf = col.Shree_Tech__Lookup_Field_API_Name__c.toLowerCase();
                     if (!soqlFields.contains(lf)) soqlFields.add(lf);
                 }
+                configureRecordLink(cd, baseObject);
+                if (String.isNotBlank(cd.linkIdPath) && !soqlFields.contains(cd.linkIdPath.toLowerCase())) soqlFields.add(cd.linkIdPath.toLowerCase());
+                if (String.isNotBlank(cd.linkLabelPath) && !soqlFields.contains(cd.linkLabelPath.toLowerCase())) soqlFields.add(cd.linkLabelPath.toLowerCase());
                 keyToSoql.put(cd.key, path);
             }
 
@@ -450,6 +453,46 @@ public inherited sharing class SimpleTableService {
 
     // ─── Record → DTO Mapper ─────────────────────────────────────────────────
 
+    // Resolve links from schema, independent of configured UI data type/label.
+    @TestVisible
+    private static void configureRecordLink(SimpleTableDTO.ColumnDef columnDef, String baseObject) {
+        if (String.isBlank(columnDef.soqlFieldPath)) return;
+        Schema.SObjectType objectType = Schema.getGlobalDescribe().get(baseObject);
+        if (objectType == null) return;
+        List<String> parts = columnDef.soqlFieldPath.split('\\.');
+        List<String> relationships = new List<String>();
+        for (Integer i = 0; i < parts.size() - 1; i++) {
+            Schema.DescribeFieldResult referenceField;
+            for (Schema.SObjectField candidate : objectType.getDescribe().fields.getMap().values()) {
+                Schema.DescribeFieldResult described = candidate.getDescribe();
+                if (described.getRelationshipName() != null && described.getRelationshipName().equalsIgnoreCase(parts[i])) {
+                    referenceField = described; break;
+                }
+            }
+            if (referenceField == null || referenceField.getReferenceTo().isEmpty()) return;
+            relationships.add(referenceField.getRelationshipName());
+            objectType = referenceField.getReferenceTo()[0];
+        }
+        Schema.SObjectField terminalField = objectType.getDescribe().fields.getMap().get(parts[parts.size() - 1]);
+        if (terminalField == null) return;
+        Schema.DescribeFieldResult terminal = terminalField.getDescribe();
+        String prefix = relationships.isEmpty() ? '' : String.join(relationships, '.') + '.';
+        if (terminal.getType() == Schema.DisplayType.REFERENCE && terminal.getRelationshipName() != null) {
+            columnDef.linkIdPath = prefix + terminal.getName();
+            String nameField;
+            for (Schema.SObjectField candidate : terminal.getReferenceTo()[0].getDescribe().fields.getMap().values()) {
+                if (candidate.getDescribe().isNameField()) { nameField = candidate.getDescribe().getName(); break; }
+            }
+            // Polymorphic references expose the common Name field.
+            if (terminal.getReferenceTo().size() > 1) nameField = 'Name';
+            if (nameField != null) columnDef.linkLabelPath = prefix + terminal.getRelationshipName() + '.' + nameField;
+        } else if (terminal.isNameField() || (!relationships.isEmpty() && columnDef.isLookup == true)) {
+            columnDef.linkIdPath = prefix + 'Id';
+            columnDef.linkLabelPath = columnDef.soqlFieldPath;
+        }
+    }
+
+    @TestVisible
     private static List<SimpleTableDTO.RowData> mapRecords(
         List<SObject>                  records,
         List<SimpleTableDTO.ColumnDef> columns,
@@ -461,6 +504,7 @@ public inherited sharing class SimpleTableService {
             SimpleTableDTO.RowData row = new SimpleTableDTO.RowData();
             row.recordId = (String) rec.get('Id');
             row.fields   = new Map<String, Object>();
+            row.recordLinks = new Map<String, SimpleTableDTO.RecordLink>();
 
             for (SimpleTableDTO.ColumnDef cd : columns) {
                 String soqlPath = keyToSoql.get(cd.key);
@@ -468,6 +512,17 @@ public inherited sharing class SimpleTableService {
 
                 Object val = resolveFieldValue(rec, soqlPath);
                 row.fields.put(cd.key, val);
+                if (String.isNotBlank(cd.linkIdPath)) {
+                    Object relatedId = resolveFieldValue(rec, cd.linkIdPath);
+                    if (relatedId != null) {
+                        SimpleTableDTO.RecordLink recordLink = new SimpleTableDTO.RecordLink();
+                        recordLink.recordId = String.valueOf(relatedId);
+                        recordLink.objectApiName = getObjectTypeFromId(recordLink.recordId);
+                        Object labelValue = String.isNotBlank(cd.linkLabelPath) ? resolveFieldValue(rec, cd.linkLabelPath) : val;
+                        recordLink.label = labelValue == null ? null : String.valueOf(labelValue);
+                        if (recordLink.objectApiName != null && String.isNotBlank(recordLink.label)) row.recordLinks.put(cd.key, recordLink);
+                    }
+                }
             }
 
             rows.add(row);

@@ -115,7 +115,7 @@
                     <template for:each={filteredRows} for:item="row">
                       <tr key={row.recordId}>
                         <template for:each={row.cells} for:item="cell">
-                          <td key={cell.key}><span class="sdt-cell" title={cell.value}>{cell.value}</span></td>
+                          <td key={cell.key}><template if:true={cell.isRecordLink}><a class="sdt-cell sdt-record-link" href={cell.href} title={cell.value} data-record-id={cell.recordId} data-object-api-name={cell.objectApiName} onclick={handleRecordClick}>{cell.value}</a></template><template if:false={cell.isRecordLink}><span class="sdt-cell" title={cell.value}>{cell.value}</span></template></td>
                         </template>
                       </tr>
                     </template>
@@ -141,7 +141,7 @@
                     <template for:each={row.cardCells} for:item="cell">
                       <div key={cell.key} class="sdt-card-field">
                         <span class="sdt-card-label">{cell.label}</span>
-                        <span class="sdt-card-value">{cell.value}</span>
+                        <template if:true={cell.isRecordLink}><a class="sdt-card-value sdt-record-link" href={cell.href} data-record-id={cell.recordId} data-object-api-name={cell.objectApiName} onclick={handleRecordClick}>{cell.value}</a></template><template if:false={cell.isRecordLink}><span class="sdt-card-value">{cell.value}</span></template>
                       </div>
                     </template>
                   </div>
