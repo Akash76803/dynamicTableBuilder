@@ -1,0 +1,15 @@
+flowchart TD
+    Host["simpleDataTable or another host"] --> UI["sdtDataExport"]
+    UI --> Scope{"Export scope"}
+    Scope -->|"Page or loaded"| CSV["Bounded browser CSV"]
+    Scope -->|"All matching"| Controller["SDTExportController"]
+    Controller --> Service["SDTExportService"]
+    Service --> Job[("Table_Export_Log__c")]
+    Job --> Worker["SDTExportWorker"]
+    Worker --> Query["SDTQueryService"]
+    Table["SimpleTableService"] --> Query
+    Worker --> Output["CSV parts and Salesforce Files"]
+    Worker --> Finalizer["SDTExportFinalizer"]
+    Finalizer --> Job
+    Dispatcher["Dispatcher and cleanup"] --> Job
+    Output --> UI

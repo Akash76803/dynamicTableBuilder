@@ -1,0 +1,7 @@
+erDiagram
+    USER ||--o{ TABLE_EXPORT_LOG : requests
+    TABLE_CONFIG ||--o{ TABLE_EXPORT_LOG : configures
+    TABLE_EXPORT_LOG ||--o{ TABLE_EXPORT_PART : owns
+    TABLE_EXPORT_LOG ||--o{ CONTENT_DOCUMENT_LINK : links
+    CONTENT_DOCUMENT ||--o{ CONTENT_DOCUMENT_LINK : shares
+    CONTENT_DOCUMENT ||--o{ CONTENT_VERSION : versions
