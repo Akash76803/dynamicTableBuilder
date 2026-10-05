@@ -70,12 +70,8 @@ public inherited sharing class SimpleTableService {
                 if (!soqlFields.contains(path)) {
                     soqlFields.add(path);
                 }
-                // Also pull lookup Id field if present
-                if (cd.isLookup && String.isNotBlank(col.Lookup_Field_API_Name__c)) {
-                    String lf = col.Lookup_Field_API_Name__c.toLowerCase();
-                    if (!soqlFields.contains(lf)) soqlFields.add(lf);
-                }
                 configureRecordLink(cd, baseObject);
+                applyConfiguredLookupPath(cd, baseObject, col.Lookup_Field_API_Name__c);
                 if (String.isNotBlank(cd.linkIdPath) && !soqlFields.contains(cd.linkIdPath.toLowerCase())) soqlFields.add(cd.linkIdPath.toLowerCase());
                 if (String.isNotBlank(cd.linkLabelPath) && !soqlFields.contains(cd.linkLabelPath.toLowerCase())) soqlFields.add(cd.linkLabelPath.toLowerCase());
                 keyToSoql.put(cd.key, path);
@@ -452,6 +448,38 @@ public inherited sharing class SimpleTableService {
     }
 
     // ─── Record → DTO Mapper ─────────────────────────────────────────────────
+
+    @TestVisible
+    private static void applyConfiguredLookupPath(SimpleTableDTO.ColumnDef columnDef, String baseObject, String configuredPath) {
+        if (String.isBlank(configuredPath)) return; // Keep automatic schema fallback.
+        // The base record name always opens the current row.
+        if (columnDef.linkIdPath == 'Id' && !columnDef.soqlFieldPath.contains('.')) return;
+        List<String> parts = configuredPath.trim().split('\\.');
+        Schema.SObjectType objectType = Schema.getGlobalDescribe().get(baseObject);
+        List<String> canonical = new List<String>();
+        if (objectType == null) throw new AuraHandledException('Invalid lookup object: ' + baseObject);
+        for (Integer i = 0; i < parts.size() - 1; i++) {
+            Schema.DescribeFieldResult referenceField;
+            for (Schema.SObjectField candidate : objectType.getDescribe().fields.getMap().values()) {
+                Schema.DescribeFieldResult described = candidate.getDescribe();
+                if (described.getRelationshipName() != null && described.getRelationshipName().equalsIgnoreCase(parts[i])) {
+                    referenceField = described; break;
+                }
+            }
+            if (referenceField == null || referenceField.getReferenceTo().isEmpty()) throw new AuraHandledException('Invalid lookup ID path: ' + configuredPath);
+            canonical.add(referenceField.getRelationshipName());
+            objectType = referenceField.getReferenceTo()[0];
+        }
+        Schema.SObjectField terminalField = objectType.getDescribe().fields.getMap().get(parts[parts.size() - 1]);
+        if (terminalField == null) throw new AuraHandledException('Invalid lookup ID path: ' + configuredPath);
+        Schema.DescribeFieldResult terminal = terminalField.getDescribe();
+        if (terminal.getType() != Schema.DisplayType.ID && terminal.getType() != Schema.DisplayType.REFERENCE) {
+            throw new AuraHandledException('Lookup path must end in an Id or reference field: ' + configuredPath);
+        }
+        canonical.add(terminal.getName());
+        columnDef.linkIdPath = String.join(canonical, '.');
+        columnDef.linkLabelPath = columnDef.soqlFieldPath;
+    }
 
     // Resolve links from schema, independent of configured UI data type/label.
     @TestVisible
