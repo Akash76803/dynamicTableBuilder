@@ -62,4 +62,10 @@ private class SimpleTableRecordLinkTest {
         System.assertEquals('Acme', rows[0].recordLinks.get('Account.Name').label);
         System.assertEquals('Acme', rows[0].fields.get('Account.Name'));
     }
+    @IsTest static void queryFieldsAreCaseInsensitiveAndUnique() {
+        List<String> fields = new List<String>{'Id', 'id', 'Name', 'name', 'Account.Id', 'account.id', 'Account.Name', 'account.name'};
+        System.assertEquals(new List<String>{'Id', 'Name', 'Account.Id', 'Account.Name'}, SimpleTableService.uniqueQueryFields(fields));
+        String queryText = SimpleTableService.buildQuery('Contact', fields, null, null, new List<SimpleTableDTO.ColumnDef>(), null, null, null, null);
+        System.assertEquals('SELECT Id, Name, Account.Id, Account.Name FROM Contact LIMIT 2000', queryText);
+    }
 }
