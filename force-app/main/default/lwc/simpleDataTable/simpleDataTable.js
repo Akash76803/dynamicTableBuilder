@@ -29,6 +29,11 @@ export default class SimpleDataTable extends LightningElement {
     viewMode = 'table'; // 'table' or 'card'
     showFilterPanel = false;
     showColManager = false;
+    wrapText = false;
+    columnWidths = {};
+    _resizeState;
+    _moveResize;
+    _endResize;
 
     // ─── Data Fetching ────────────────────────────────────────────────────────
     
@@ -37,7 +42,13 @@ export default class SimpleDataTable extends LightningElement {
 
     connectedCallback() {
         this._parentId = this.recordId || '';
+        this._loadWidthPreferences();
         this.loadData();
+    }
+
+    disconnectedCallback() {
+        clearTimeout(this._searchTimeout);
+        this._stopResize();
     }
 
     loadData() {
@@ -129,8 +140,108 @@ export default class SimpleDataTable extends LightningElement {
         return this.columns.filter(c => c.visible).map(c => ({
             ...c,
             isSorted: this.sortColumn === c.key,
+            widthStyle: `width: ${this._columnWidth(c)}px;`,
+            resizeLabel: `Resize ${c.label}`,
+            width: this._columnWidth(c),
             sortIcon: this.sortColumn === c.key && this.sortDirection === 'asc' ? '▲' : '▼'
         }));
+    }
+
+    get tableClass() {
+        return `sdt-table ${this.wrapText ? 'sdt-table-wrap' : ''}`;
+    }
+
+    get tableStyle() {
+        return `width: ${this.visibleColumns.reduce((sum, c) => sum + c.width, 0)}px;`;
+    }
+
+    get wrapLabel() { return this.wrapText ? 'Clip text' : 'Wrap text'; }
+
+    get recordRange() {
+        const start = this.totalRecords ? (this.currentPage - 1) * this.pageSize + 1 : 0;
+        return `${start}–${Math.min(this.currentPage * this.pageSize, this.totalRecords)} of ${this.totalRecords} records`;
+    }
+
+    handleRefresh() { this.loadData(); }
+
+    toggleWrapText() { this.wrapText = !this.wrapText; }
+
+    _widthKey(col) { return col.fieldName || col.key; }
+
+    _columnWidth(col) {
+        const saved = Number(this.columnWidths[this._widthKey(col)]);
+        if (Number.isFinite(saved) && saved >= 90 && saved <= 600) return saved;
+        if (col.isCurrency || col.isNumber || col.isPercent) return 150;
+        if (col.isDate || col.isDateTime || col.isBoolean) return 150;
+        return /description/i.test(col.fieldName || col.label || '') ? 300 : 200;
+    }
+
+    _setColumnWidth(key, value) {
+        const col = this.columns.find(c => c.key === key);
+        if (!col) return;
+        this.columnWidths = { ...this.columnWidths, [this._widthKey(col)]: Math.max(90, Math.min(600, Math.round(value))) };
+    }
+
+    handleResizeStart(event) {
+        if (event.button !== undefined && event.button !== 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+        this._stopResize();
+        const key = event.currentTarget.dataset.col;
+        const col = this.columns.find(c => c.key === key);
+        if (!col) return;
+        this._resizeState = { key, x: event.clientX, width: this._columnWidth(col), pointerId: event.pointerId };
+        this._moveResize = ev => {
+            if (!this._resizeState || ev.pointerId !== this._resizeState.pointerId) return;
+            this._setColumnWidth(key, this._resizeState.width + ev.clientX - this._resizeState.x);
+        };
+        this._endResize = ev => {
+            if (this._resizeState && ev.pointerId === this._resizeState.pointerId) {
+                this._saveWidthPreferences();
+                this._stopResize();
+            }
+        };
+        window.addEventListener('pointermove', this._moveResize);
+        window.addEventListener('pointerup', this._endResize);
+        window.addEventListener('pointercancel', this._endResize);
+    }
+
+    handleResizeKey(event) {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        event.stopPropagation();
+        const col = this.columns.find(c => c.key === event.currentTarget.dataset.col);
+        if (!col) return;
+        this._setColumnWidth(col.key, this._columnWidth(col) + (event.key === 'ArrowRight' ? 10 : -10));
+        this._saveWidthPreferences();
+    }
+
+    _stopResize() {
+        if (this._moveResize) window.removeEventListener('pointermove', this._moveResize);
+        if (this._endResize) {
+            window.removeEventListener('pointerup', this._endResize);
+            window.removeEventListener('pointercancel', this._endResize);
+        }
+        this._resizeState = null;
+        this._moveResize = null;
+        this._endResize = null;
+    }
+
+    resetColumnWidths() {
+        this._stopResize();
+        this.columnWidths = {};
+        try { localStorage.removeItem('sdt_widths_' + (this.tableName || 'default')); } catch (e) { /* Optional browser preference. */ }
+    }
+
+    _loadWidthPreferences() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('sdt_widths_' + (this.tableName || 'default')) || '{}');
+            this.columnWidths = saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+        } catch (e) { this.columnWidths = {}; }
+    }
+
+    _saveWidthPreferences() {
+        try { localStorage.setItem('sdt_widths_' + (this.tableName || 'default'), JSON.stringify(this.columnWidths)); } catch (e) { /* Optional browser preference. */ }
     }
 
     get filterBtnClass() {

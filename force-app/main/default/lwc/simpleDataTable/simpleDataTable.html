@@ -4,15 +4,18 @@
     <!-- Toolbar -->
     <div class="sdt-toolbar">
       <div class="toolbar-left">
-        <h2 class="sdt-title">{tableName}</h2>
-        <span class="sdt-count">({filteredRows.length} records)</span>
+        <span class="sdt-object-icon"><lightning-icon icon-name="standard:record" size="small" alternative-text="Dynamic table"></lightning-icon></span>
+        <div><h2 class="sdt-title">{tableName}</h2><span class="sdt-count">{totalRecords} records</span></div>
       </div>
       <div class="toolbar-right">
         <!-- Search -->
         <div class="sdt-search">
-          <input type="text" placeholder="Search..." oninput={handleSearch} class="sdt-search-input" />
+          <input type="text" aria-label="Search this list" placeholder="Search this list..." oninput={handleSearch} class="sdt-search-input" />
         </div>
 
+        <button class="sdt-btn sdt-btn-icon" onclick={handleRefresh} title="Refresh" aria-label="Refresh table"><lightning-icon icon-name="utility:refresh" size="x-small" alternative-text="Refresh"></lightning-icon></button>
+        <button class="sdt-btn" onclick={toggleWrapText} aria-pressed={wrapText}>{wrapLabel}</button>
+        <button class="sdt-btn" onclick={resetColumnWidths}>Reset widths</button>
         <!-- View Toggle -->
         <button class="sdt-btn sdt-btn-icon" onclick={toggleViewMode} title="Toggle View Mode">
           <template if:true={isTableView}>
@@ -86,22 +89,24 @@
             <!-- Table View -->
             <template if:true={showTableView}>
               <div class="sdt-table-container">
-                <table class="sdt-table">
+                <table class={tableClass} style={tableStyle} aria-label={tableName}>
+                  <colgroup><template for:each={visibleColumns} for:item="col"><col key={col.key} style={col.widthStyle} /></template></colgroup>
                   <thead>
                     <tr>
                       <template for:each={visibleColumns} for:item="col">
-                        <th key={col.key}>
+                        <th key={col.key} scope="col">
                           <template if:true={col.sortable}>
-                            <a href="javascript:void(0);" class="sdt-sort-th" data-col={col.key} onclick={handleSort}>
+                            <button type="button" class="sdt-sort-th" data-col={col.key} onclick={handleSort}>
                               {col.label}
                               <template if:true={col.isSorted}>
                                 <span class="sdt-sort-icon">{col.sortIcon}</span>
                               </template>
-                            </a>
+                            </button>
                           </template>
                           <template if:false={col.sortable}>
                             {col.label}
                           </template>
+                          <button type="button" class="sdt-resize-handle" data-col={col.key} aria-label={col.resizeLabel} title="Drag to resize or use left and right arrow keys" onpointerdown={handleResizeStart} onkeydown={handleResizeKey}></button>
                         </th>
                       </template>
                     </tr>
@@ -110,7 +115,7 @@
                     <template for:each={filteredRows} for:item="row">
                       <tr key={row.recordId}>
                         <template for:each={row.cells} for:item="cell">
-                          <td key={cell.key}>{cell.value}</td>
+                          <td key={cell.key}><span class="sdt-cell" title={cell.value}>{cell.value}</span></td>
                         </template>
                       </tr>
                     </template>
@@ -147,6 +152,7 @@
             <!-- Pagination Footer -->
             <template if:false={isEmpty}>
               <div class="sdt-pagination">
+                <span class="sdt-record-range">{recordRange}</span>
                 <button class="sdt-btn" onclick={handlePrevPage} disabled={isFirstPage}>Previous</button>
                 <span class="sdt-page-info">{paginationText}</span>
                 <button class="sdt-btn" onclick={handleNextPage} disabled={isLastPage}>Next</button>
