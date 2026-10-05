@@ -1,0 +1,16 @@
+flowchart TD
+    A["Lock job and verify checkpoint"] --> B["Fetch bounded page"]
+    B --> C["Build complete rows within budgets"]
+    C --> D["Atomically save file part and checkpoint"]
+    D --> E{"Rows remain?"}
+    E -->|"No"| F["Mark Completed"]
+    E -->|"Yes"| G{"Continuation capacity?"}
+    G -->|"Available"| H["Enqueue one worker and return"]
+    G -->|"Unavailable"| I["Persist Waiting for dispatcher"]
+    H --> J["Fresh transaction"]
+    I --> J
+    J --> A
+    C -->|"Failure"| K["Rollback and finalizer recovery"]
+    K --> L{"Retry eligible?"}
+    L -->|"Yes"| I
+    L -->|"No"| M["Failed with actionable error"]
