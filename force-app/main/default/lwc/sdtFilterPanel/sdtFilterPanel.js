@@ -21,6 +21,10 @@ const TYPE_OPERATORS = {
                { label: 'Greater Than',    value: 'greater_than'  },
                { label: 'Less Than',       value: 'less_than'     },
                { label: 'Between',         value: 'between'       }],
+    percentage:  [{ label: 'Equals',          value: 'equals'        },
+               { label: 'Greater Than',    value: 'greater_than'  },
+               { label: 'Less Than',       value: 'less_than'     },
+               { label: 'Between',         value: 'between'       }],
     date:     [{ label: 'Equals',          value: 'equals'        },
                { label: 'Before',          value: 'before'        },
                { label: 'After',           value: 'after'         },
@@ -31,7 +35,11 @@ const TYPE_OPERATORS = {
                { label: 'After',           value: 'after'         },
                { label: 'Between',         value: 'between'       }],
     picklist: [{ label: 'Equals',          value: 'equals'        },
-               { label: 'Not Equals',      value: 'not_equals'    }],
+               { label: 'Not Equals',      value: 'not_equals'    },
+               { label: 'In',              value: 'in'            },
+               { label: 'Not In',          value: 'not_in'        }],
+    multipicklist: [{ label: 'Includes',   value: 'includes'      },
+                    { label: 'Excludes',   value: 'excludes'      }],
     boolean:  [{ label: 'Is True',         value: 'is_true'       },
                { label: 'Is False',        value: 'is_false'      }],
     lookup:   [{ label: 'Equals',          value: 'equals'        },
@@ -53,9 +61,11 @@ const newRow = () => ({
     value:           '',
     valueMin:        '',
     valueMax:        '',
+    picklistOptions: [],
     inputType:       'text',
     showSingleInput: false,
     showRangeInput:  false,
+    showPicklistInput: false,
 });
 
 export default class SdtFilterPanel extends LightningElement {
@@ -84,6 +94,15 @@ export default class SdtFilterPanel extends LightningElement {
                 row.value     = f.value    || '';
                 row.valueMin  = f.valueMin || '';
                 row.valueMax  = f.valueMax || '';
+                
+                let selectedVals = row.value ? row.value.split(';') : [];
+                if (col && col.picklistOptions) {
+                    row.picklistOptions = col.picklistOptions.map(opt => ({
+                        ...opt,
+                        selected: selectedVals.includes(opt.value)
+                    }));
+                }
+
                 this._refreshInputState(row);
                 return row;
             });
@@ -125,9 +144,16 @@ export default class SdtFilterPanel extends LightningElement {
 
         this.filterRows = this.filterRows.map(r => {
             if (r.id !== id) return r;
+            
+            let picklistOptions = [];
+            if (col && col.picklistOptions) {
+                picklistOptions = col.picklistOptions.map(opt => ({ ...opt, selected: false }));
+            }
+
             const updated = { ...r, fieldKey, dataType: dt,
                 operators: TYPE_OPERATORS[dt] || TYPE_OPERATORS.text,
                 operator: '', value: '', valueMin: '', valueMax: '',
+                picklistOptions, showPicklistInput: false,
                 showSingleInput: false, showRangeInput: false };
             return updated;
         });
@@ -151,6 +177,27 @@ export default class SdtFilterPanel extends LightningElement {
         this.filterRows = this.filterRows.map(r => {
             if (r.id !== id) return r;
             return { ...r, [col]: val };
+        });
+    }
+
+    handleMultiSelectChange(event) {
+        const id = event.currentTarget.dataset.id;
+        const val = event.detail.value; // this will be the semicolon separated string
+        
+        this.filterRows = this.filterRows.map(r => {
+            if (r.id !== id) return r;
+            
+            // Also update the selected state in picklistOptions so it stays in sync
+            let selectedVals = val ? val.split(';') : [];
+            let newOptions = [];
+            if (r.picklistOptions) {
+                newOptions = r.picklistOptions.map(opt => ({
+                    ...opt,
+                    selected: selectedVals.includes(opt.value)
+                }));
+            }
+            
+            return { ...r, picklistOptions: newOptions, value: val };
         });
     }
 
@@ -188,13 +235,16 @@ export default class SdtFilterPanel extends LightningElement {
 
     _refreshInputState(row) {
         const op = row.operator;
-        row.showRangeInput  = RANGE_OPS.has(op);
-        row.showSingleInput = op && !RANGE_OPS.has(op) && !NO_VAL_OPS.has(op);
-
         const dt = row.dataType;
+        const isPicklist = dt === 'picklist' || dt === 'multipicklist';
+        
+        row.showRangeInput  = RANGE_OPS.has(op);
+        row.showPicklistInput = isPicklist && op && !NO_VAL_OPS.has(op);
+        row.showSingleInput = !isPicklist && op && !RANGE_OPS.has(op) && !NO_VAL_OPS.has(op);
+
         row.inputType = (dt === 'date') ? 'date'
                       : (dt === 'datetime') ? 'datetime-local'
-                      : (dt === 'number' || dt === 'currency' || dt === 'percent') ? 'number'
+                      : (dt === 'number' || dt === 'currency' || dt === 'percent' || dt === 'percentage') ? 'number'
                       : 'text';
     }
 }

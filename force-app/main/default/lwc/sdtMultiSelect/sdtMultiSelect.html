@@ -1,0 +1,76 @@
+<template>
+    <div class="slds-form-element">
+        <label if:true={label} class="slds-form-element__label">{label}</label>
+        <div class="slds-form-element__control sdt-multi-select">
+            
+            <!-- Main Input Box containing pills -->
+            <div class="ms-input-box" onclick={toggleDropdown}>
+                <div class="ms-pills-container">
+                    <template if:false={hasSelection}>
+                        <span class="ms-placeholder">{placeholder}</span>
+                    </template>
+                    <template if:true={hasSelection}>
+                        <template for:each={visiblePills} for:item="pill">
+                            <span key={pill.value} class="ms-pill">
+                                {pill.label}
+                                <span class="ms-pill-remove" data-val={pill.value} onclick={removePill} title="Remove">✕</span>
+                            </span>
+                        </template>
+                        <template if:true={overflowCount}>
+                            <span class="ms-pill-overflow">+{overflowCount}</span>
+                        </template>
+                    </template>
+                </div>
+                <div class="ms-icon">
+                    <lightning-icon icon-name="utility:down" size="xx-small"></lightning-icon>
+                </div>
+            </div>
+
+            <!-- Dropdown -->
+            <template if:true={isOpen}>
+                <div class="ms-dropdown">
+                    
+                    <!-- Search Bar -->
+                    <div class="ms-search-box">
+                        <lightning-icon icon-name="utility:search" size="x-small" class="ms-search-icon"></lightning-icon>
+                        <input type="text" placeholder="Search options..." oninput={handleSearch} class="ms-search-input" />
+                    </div>
+                    
+                    <!-- Header Actions -->
+                    <div class="ms-header-actions">
+                        <button class="ms-btn ms-btn-link" onclick={selectAllVisible}>Select visible</button>
+                        <button class="ms-btn ms-btn-link" onclick={clearSelections}>Clear selections</button>
+                    </div>
+
+                    <!-- Options List -->
+                    <ul class="ms-options-list">
+                        <template for:each={filteredOptions} for:item="opt">
+                            <li key={opt.value} class="ms-option-item">
+                                <label class="ms-option">
+                                    <span class="ms-option-checkbox">
+                                        <input type="checkbox" value={opt.value} checked={opt.selected} onchange={handleCheckboxChange} />
+                                    </span>
+                                    <span class="ms-option-label" title={opt.label}>{opt.label}</span>
+                                </label>
+                            </li>
+                        </template>
+                        <template if:false={hasFilteredOptions}>
+                            <li class="ms-no-options">No options found.</li>
+                        </template>
+                    </ul>
+
+                    <!-- Footer -->
+                    <div class="ms-footer">
+                        <span class="ms-footer-text">{selectedCount} selected</span>
+                        <button class="ms-btn ms-btn-primary" onclick={closeDropdown}>Done</button>
+                    </div>
+                </div>
+            </template>
+            
+            <!-- Overlay to close dropdown when clicking outside -->
+            <template if:true={isOpen}>
+                <div class="ms-overlay" onclick={closeDropdown}></div>
+            </template>
+        </div>
+    </div>
+</template>

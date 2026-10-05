@@ -209,8 +209,69 @@ public inherited sharing class SimpleTableService {
         cd.isDate     = dt == 'date';
         cd.isDateTime = dt == 'datetime';
         cd.isBoolean  = dt == 'boolean';
-        cd.isPicklist = dt == 'picklist';
+        cd.isPicklist = dt == 'picklist' || dt == 'multipicklist';
         cd.isLookup   = dt == 'lookup';
+
+        // Fetch picklist values dynamically
+        if (cd.isPicklist && String.isNotBlank(baseObject) && String.isNotBlank(cd.fieldName)) {
+            try {
+                String targetObj = baseObject;
+                String targetFld = cd.fieldName;
+
+                if (targetFld.contains('.')) {
+                    List<String> parts = targetFld.split('\\.');
+                    targetFld = parts[parts.size() - 1]; // "Industry"
+                    
+                    Schema.SObjectType currentObjType = Schema.getGlobalDescribe().get(baseObject);
+                    for (Integer i = 0; i < parts.size() - 1; i++) {
+                        String relName = parts[i];
+                        if (currentObjType == null) break;
+                        
+                        Schema.DescribeSObjectResult describe = currentObjType.getDescribe();
+                        Boolean found = false;
+                        for (Schema.SObjectField f : describe.fields.getMap().values()) {
+                            Schema.DescribeFieldResult dfr = f.getDescribe();
+                            if (dfr.getRelationshipName() != null && dfr.getRelationshipName().equalsIgnoreCase(relName)) {
+                                if (dfr.getReferenceTo().size() > 0) {
+                                    currentObjType = dfr.getReferenceTo()[0];
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!found) {
+                            currentObjType = null;
+                            break;
+                        }
+                    }
+                    if (currentObjType != null) {
+                        targetObj = String.valueOf(currentObjType);
+                    }
+                }
+
+                if (!sObjectTypeCache.containsKey(targetObj)) {
+                    sObjectTypeCache.put(targetObj, Schema.getGlobalDescribe().get(targetObj));
+                }
+                Schema.SObjectType sObjType = sObjectTypeCache.get(targetObj);
+                if (sObjType != null) {
+                    if (!fieldMapCache.containsKey(targetObj)) {
+                        fieldMapCache.put(targetObj, sObjType.getDescribe().fields.getMap());
+                    }
+                    Schema.SObjectField sField = fieldMapCache.get(targetObj).get(targetFld);
+                    if (sField != null) {
+                        List<Schema.PicklistEntry> entries = sField.getDescribe().getPicklistValues();
+                        cd.picklistOptions = new List<SimpleTableDTO.PicklistOption>();
+                        for (Schema.PicklistEntry entry : entries) {
+                            if (entry.isActive()) {
+                                cd.picklistOptions.add(new SimpleTableDTO.PicklistOption(entry.getLabel(), entry.getValue()));
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // Ignore metadata describe errors
+            }
+        }
 
         return cd;
     }
@@ -310,7 +371,7 @@ public inherited sharing class SimpleTableService {
         
         if (String.isBlank(val) && op != 'is_null' && op != 'is_not_null' && op != 'between') return null;
 
-        Boolean isNumOrDate = dataType.equalsIgnoreCase('Number') || dataType.equalsIgnoreCase('Currency') || dataType.equalsIgnoreCase('Percent') || dataType.equalsIgnoreCase('Date') || dataType.equalsIgnoreCase('DateTime') || dataType.equalsIgnoreCase('Boolean');
+        Boolean isNumOrDate = dataType.equalsIgnoreCase('Number') || dataType.equalsIgnoreCase('Currency') || dataType.equalsIgnoreCase('Percent') || dataType.equalsIgnoreCase('Percentage') || dataType.equalsIgnoreCase('Date') || dataType.equalsIgnoreCase('DateTime') || dataType.equalsIgnoreCase('Boolean');
         
         String safeVal = isNumOrDate ? String.escapeSingleQuotes(val) : '\'' + String.escapeSingleQuotes(val) + '\'';
 
@@ -324,6 +385,19 @@ public inherited sharing class SimpleTableService {
         if (op == 'not_contains') return '(NOT ' + field + ' LIKE \'%' + String.escapeSingleQuotes(val) + '%\')';
         if (op == 'starts_with') return field + ' LIKE \'' + String.escapeSingleQuotes(val) + '%\'';
         if (op == 'ends_with') return field + ' LIKE \'%' + String.escapeSingleQuotes(val) + '\'';
+        
+        if (op == 'in' || op == 'not_in' || op == 'includes' || op == 'excludes') {
+            List<String> parts = val.split(';');
+            List<String> escapedParts = new List<String>();
+            for (String p : parts) {
+                escapedParts.add('\'' + String.escapeSingleQuotes(p.trim()) + '\'');
+            }
+            String joined = '(' + String.join(escapedParts, ',') + ')';
+            if (op == 'in') return field + ' IN ' + joined;
+            if (op == 'not_in') return field + ' NOT IN ' + joined;
+            if (op == 'includes') return field + ' INCLUDES ' + joined;
+            if (op == 'excludes') return field + ' EXCLUDES ' + joined;
+        }
         
         if (op == 'between') {
             if (String.isNotBlank(f.valueMin) && String.isNotBlank(f.valueMax)) {

@@ -36,6 +36,16 @@ public class SimpleTableDTO {
         @AuraEnabled public Boolean isBoolean;
         @AuraEnabled public Boolean isPicklist;
         @AuraEnabled public Boolean isLookup;
+        @AuraEnabled public List<PicklistOption> picklistOptions; // Added for Picklist/Multipicklist
+    }
+
+    public class PicklistOption {
+        @AuraEnabled public String label;
+        @AuraEnabled public String value;
+        public PicklistOption(String label, String value) {
+            this.label = label;
+            this.value = value;
+        }
     }
 
     public class FilterDef {

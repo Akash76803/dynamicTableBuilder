@@ -61,6 +61,18 @@
             />
           </template>
 
+          <!-- Picklist Input (multi-select combobox) -->
+          <template if:true={row.showPicklistInput}>
+            <div class="filter-input-wrapper" style="flex: 1 1 100px; min-width: 80px;">
+              <c-sdt-multi-select
+                options={row.picklistOptions}
+                value={row.value}
+                data-id={row.id}
+                onchange={handleMultiSelectChange}
+              ></c-sdt-multi-select>
+            </div>
+          </template>
+
           <!-- Value Input (between / range) -->
           <template if:true={row.showRangeInput}>
             <input
